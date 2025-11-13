@@ -4,4 +4,5 @@ window.EMAIL_CONSIGNEE_MAP = {
   "accounts.za@pechfruits.com": "ALL",
   "southafrica@pechfruits.com": "ALL",
   "test@pechfruits.com": "NEW VISION"  // optional test
+  "allfoodsserviceslc23@yahoo.com": "ALLFOODS"
 };
