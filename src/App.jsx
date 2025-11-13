@@ -26,7 +26,15 @@ function App() {
       fetch('/data/shipments.json')
         .then(res => res.json())
         .then(data => {
-          const userConsignee = emailMap[user.email.toLowerCase()];
+          const userEmail = user.email.toLowerCase();
+          const userConsignee = emailMap[userEmail];
+
+          // DEBUG: Log everything
+          console.log('User email:', userEmail);
+          console.log('User consignee:', userConsignee);
+          console.log('Total shipments in JSON:', data.length);
+          console.log('Sample shipment CONSIGNEE:', data[0]?.['CONSIGNEE']);
+
           if (!userConsignee) {
             setShipments([]);
             setLoading(false);
@@ -34,17 +42,27 @@ function App() {
           }
 
           let filtered = data;
+
           if (userConsignee !== "ALL") {
-            filtered = data.filter(row =>
-              row['CONSIGNEE'] && row['CONSIGNEE'].toUpperCase().includes(userConsignee.toUpperCase())
-            );
+            // LOOSE MATCH: "contains" anywhere in CONSIGNEE
+            filtered = data.filter(row => {
+              const consignee = row['CONSIGNEE'] || '';
+              const consigneeUpper = consignee.toUpperCase();
+              const searchTerm = userConsignee.toUpperCase();
+              const emailPrefix = userEmail.split('@')[0].toUpperCase();
+
+              return consigneeUpper.includes(searchTerm) || consigneeUpper.includes(emailPrefix);
+            });
           }
+
+          console.log('Filtered shipments count:', filtered.length);
+          console.log('Sample filtered CONSIGNEE:', filtered[0]?.['CONSIGNEE']);
 
           setShipments(filtered);
           setLoading(false);
         })
         .catch(err => {
-          console.error(err);
+          console.error('Fetch error:', err);
           setLoading(false);
         });
     }
@@ -79,7 +97,10 @@ function App() {
             Logged in as: <span className="font-semibold">{user.email}</span>
             <br />
             <span className="text-sm text-yellow-300">
-              {userConsignee === "ALL" ? "Viewing: ALL SHIPMENTS (MASTER ACCESS)" : `Viewing: ${userConsignee}`}
+              {userConsignee === "ALL" 
+                ? "Viewing: ALL SHIPMENTS (MASTER ACCESS)" 
+                : `Viewing: ${userConsignee}`
+              }
             </span>
           </p>
           <button
@@ -103,7 +124,7 @@ function App() {
               <div className="text-center text-white py-8">
                 No shipments found for <strong>{userConsignee}</strong>
                 <br />
-                <small className="text-gray-300">Contact admin if this is incorrect.</small>
+                <small className="text-gray-300">Check console (F12) for debug info.</small>
               </div>
             ) : (
               <div className="overflow-x-auto rounded-lg">
