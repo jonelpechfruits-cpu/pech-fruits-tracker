@@ -1,7 +1,7 @@
-// email-consignee-map.js
+// public/data/email-consignee-map.js
 window.EMAIL_CONSIGNEE_MAP = {
-  "newvisionfruitsuarl@gmail.com": "NEW VISION",
+  "newvisionfruitsuarl@gmail.com": "NEW VISION LTD",
   "accounts.za@pechfruits.com": "ALL",
   "southafrica@pechfruits.com": "ALL",
-  "Carel@southernsummit.co.za": "SOUTHERN SUMMIT"
+  "test@pechfruits.com": "NEW VISION LTD"  // optional test
 };
