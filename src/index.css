@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* PECH FRUITS OFFICIAL GRADIENT */
+html, body, #root {
+  font-family: 'Archivo', sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    #FF8C00 0%,   /* ORANGE */
+    #FF4D6D 25%,  /* RED */
+    #FFD60A 50%,  /* YELLOW */
+    #8BC34A 75%,  /* GREEN */
+    #C8E6C9 100%  /* LIGHT GREEN */
+  );
+  background-attachment: fixed;
+}
+
+/* Crisp text */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+}
