@@ -33,9 +33,12 @@ function App() {
             return;
           }
 
-          const filtered = data.filter(row =>
-            row['CONSIGNEE'] && row['CONSIGNEE'].toUpperCase().includes(userConsignee.toUpperCase())
-          );
+          let filtered = data;
+          if (userConsignee !== "ALL") {
+            filtered = data.filter(row =>
+              row['CONSIGNEE'] && row['CONSIGNEE'].toUpperCase().includes(userConsignee.toUpperCase())
+            );
+          }
 
           setShipments(filtered);
           setLoading(false);
@@ -62,7 +65,7 @@ function App() {
     }
   };
 
-  const centeredColumns = ['REF', 'INV', 'STATUS', 'ETD', 'LIVE ETA', 'DOCS'];
+  const centeredColumns = ['REF', 'INV', 'STATUS', 'POL', 'POD', 'ETD', 'LIVE ETA', 'DOCS'];
 
   if (user) {
     const userConsignee = emailMap[user.email.toLowerCase()] || 'Unknown';
@@ -75,7 +78,9 @@ function App() {
           <p className="text-white text-lg">
             Logged in as: <span className="font-semibold">{user.email}</span>
             <br />
-            <span className="text-sm text-yellow-300">Viewing: {userConsignee}</span>
+            <span className="text-sm text-yellow-300">
+              {userConsignee === "ALL" ? "Viewing: ALL SHIPMENTS (MASTER ACCESS)" : `Viewing: ${userConsignee}`}
+            </span>
           </p>
           <button
             onClick={() => auth.signOut().then(() => setUser(null))}
@@ -107,7 +112,7 @@ function App() {
                     <tr>
                       {Object.keys(shipments[0]).map((header) => {
                         const width = {
-                          'NR': 10,
+                          'NR': 5,
                           'VESSEL': 230,
                           'CONTAINER': 143,
                           'REF': 61,
@@ -116,7 +121,7 @@ function App() {
                           'CONSIGNEE': 197,
                           'PRODUCTS': 203,
                           'POL': 159,
-                          'POD': 159,
+                          'POD': 114,
                           'ETD': 100,
                           'LIVE ETA': 100,
                           'DOCS': 66
@@ -145,7 +150,7 @@ function App() {
                       <tr key={i} className="hover:bg-white hover:bg-opacity-10 transition">
                         {Object.entries(row).map(([key, cell], j) => {
                           const width = {
-                            'NR': 10,
+                            'NR': 5,
                             'VESSEL': 230,
                             'CONTAINER': 143,
                             'REF': 61,
@@ -154,7 +159,7 @@ function App() {
                             'CONSIGNEE': 197,
                             'PRODUCTS': 203,
                             'POL': 159,
-                            'POD': 159,
+                            'POD': 114,
                             'ETD': 100,
                             'LIVE ETA': 100,
                             'DOCS': 66
