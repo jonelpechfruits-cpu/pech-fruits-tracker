@@ -11,12 +11,29 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [emailMap, setEmailMap] = useState({});
 
-  // Load email → consignee map
+  // Load email map from .js file (bypasses Vercel 404)
   useEffect(() => {
-    fetch('/data/email-consignee-map.json')
-      .then(res => res.json())
-      .then(map => setEmailMap(map))
-      .catch(() => console.error('Failed to load email map'));
+    const script = document.createElement('script');
+    script.src = '/data/email-consignee-map.js';
+    script.async = true;
+    script.onload = () => {
+      if (window.EMAIL_CONSIGNEE_MAP) {
+        console.log('Email map loaded:', window.EMAIL_CONSIGNEE_MAP);
+        setEmailMap(window.EMAIL_CONSIGNEE_MAP);
+      } else {
+        console.error('EMAIL_CONSIGNEE_MAP not found in script');
+      }
+    };
+    script.onerror = () => {
+      console.error('Failed to load email-consignee-map.js');
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
   }, []);
 
   // Load and filter shipments
@@ -24,16 +41,18 @@ function App() {
     if (user && Object.keys(emailMap).length > 0) {
       setLoading(true);
       fetch('/data/shipments.json')
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
         .then(data => {
           const userEmail = user.email.toLowerCase();
           const userConsignee = emailMap[userEmail];
 
-          // DEBUG: Log everything
           console.log('User email:', userEmail);
           console.log('User consignee:', userConsignee);
-          console.log('Total shipments in JSON:', data.length);
-          console.log('Sample shipment CONSIGNEE:', data[0]?.['CONSIGNEE']);
+          console.log('Total shipments:', data.length);
+          console.log('Sample CONSIGNEE:', data[0]?.['CONSIGNEE']);
 
           if (!userConsignee) {
             setShipments([]);
@@ -44,25 +63,23 @@ function App() {
           let filtered = data;
 
           if (userConsignee !== "ALL") {
-            // LOOSE MATCH: "contains" anywhere in CONSIGNEE
             filtered = data.filter(row => {
               const consignee = row['CONSIGNEE'] || '';
               const consigneeUpper = consignee.toUpperCase();
               const searchTerm = userConsignee.toUpperCase();
               const emailPrefix = userEmail.split('@')[0].toUpperCase();
-
               return consigneeUpper.includes(searchTerm) || consigneeUpper.includes(emailPrefix);
             });
           }
 
-          console.log('Filtered shipments count:', filtered.length);
-          console.log('Sample filtered CONSIGNEE:', filtered[0]?.['CONSIGNEE']);
+          console.log('Filtered count:', filtered.length);
+          console.log('Sample filtered:', filtered[0]?.['CONSIGNEE']);
 
           setShipments(filtered);
           setLoading(false);
         })
         .catch(err => {
-          console.error('Fetch error:', err);
+          console.error('Shipments fetch error:', err);
           setLoading(false);
         });
     }
@@ -90,7 +107,7 @@ function App() {
 
     return (
       <div className="min-h-screen p-6">
-        {/* Header Card */}
+        {/* Header */}
         <div className="glass-card max-w-7xl mx-auto p-6 text-center rounded-2xl mb-8">
           <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-2">Pech Fruits Tracker</h1>
           <p className="text-white text-lg">
@@ -98,7 +115,7 @@ function App() {
             <br />
             <span className="text-sm text-yellow-300">
               {userConsignee === "ALL" 
-                ? "Viewing: ALL SHIPMENTS (MASTER ACCESS)" 
+                ? "Viewing: ALL SHIPMENTS (MASTER)" 
                 : `Viewing: ${userConsignee}`
               }
             </span>
@@ -111,7 +128,7 @@ function App() {
           </button>
         </div>
 
-        {/* Table Card */}
+        {/* Table */}
         <div className="glass-card max-w-7xl mx-auto rounded-2xl shadow-2xl">
           <div className="bg-gradient-to-r from-orange-600 to-green-700 p-5 rounded-t-2xl">
             <h2 className="text-2xl font-bold text-white">Live Shipments</h2>
@@ -124,7 +141,7 @@ function App() {
               <div className="text-center text-white py-8">
                 No shipments found for <strong>{userConsignee}</strong>
                 <br />
-                <small className="text-gray-300">Check console (F12) for debug info.</small>
+                <small className="text-gray-300">Check console (Ctrl+Shift+I) for debug.</small>
               </div>
             ) : (
               <div className="overflow-x-auto rounded-lg">
