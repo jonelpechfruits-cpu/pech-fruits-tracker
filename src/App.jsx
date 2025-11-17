@@ -57,7 +57,7 @@ function App() {
   if (!user) return (
     <div style={{minHeight:'100vh', background:'linear-gradient(135deg,#f97316,#22c55e)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem'}}>
       <div style={{background:'white', padding:'3rem', borderRadius:'1.5rem', boxShadow:'0 25px 50px rgba(0,0,0,0.3)', width:'420px', maxWidth:'95%', textAlign:'center'}}>
-        <img src="/logo.png" alt="Pech Fruits" style={{width:'120px', height:'auto', margin:'0 auto 1.5rem', display:'block'}} />
+        <img src="/logo.jpg" alt="Pech Fruits" style={{width:'140px', height:'auto', margin:'0 auto 1.5rem', display:'block'}} />
         <h1 style={{fontSize:'2.2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'0.5rem'}}>Pech Fruits Tracker</h1>
         <p style={{color:'#64748b', marginBottom:'2rem'}}>Sign in to view your live shipments</p>
         <form onSubmit={handleLogin} style={{display:'grid', gap:'1rem'}}>
@@ -82,7 +82,7 @@ function App() {
       <header style={{background:'white', boxShadow:'0 4px 20px rgba(0,0,0,0.1)', position:'sticky', top:0, zIndex:50}}>
         <div style={{padding:'1rem', display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'1rem'}}>
           <div style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-            <img src="/logo.png" alt="Pech Fruits" style={{height:'48px', width:'auto'}} />
+            <img src="/logo.jpg" alt="Pech Fruits" style={{height:'52px', width:'auto'}} />
             <h1 style={{fontSize:'1.6rem', fontWeight:'bold', color:'#1e293b', margin:0}}>Pech Fruits Tracker</h1>
           </div>
           <button onClick={()=>auth.signOut().then(()=>setUser(null))}
