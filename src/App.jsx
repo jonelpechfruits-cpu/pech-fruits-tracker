@@ -69,6 +69,77 @@ function App() {
     try {
       const folderRef = ref(storage, `documents/${refValue}`);
       const result = await listAll(folderRef);
+      const urls = await Promise.all(result.items.map(item => getDoimport { useState, useEffect } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { ref, listAll, getDownloadURL } from 'firebase/storage';
+import { auth, storage } from './firebase';
+
+function App() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [user, setUser] = useState(null);
+  const [shipments, setShipments] = useState([]);
+  const [filteredShipments, setFilteredShipments] = useState([]);
+  const [emailMap, setEmailMap] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedShipment, setSelectedShipment] = useState(null);
+  const [docs, setDocs] = useState([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+
+  useEffect(() => {
+    document.title = "Pech Fruits Tracker";
+    const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    link.rel = 'icon'; link.href = '/favicon.ico'; document.head.appendChild(link);
+  }, []);
+
+  useEffect(() => {
+    const s = document.createElement('script');
+    s.src = '/data/email-consignee-map.js'; s.async = true;
+    s.onload = () => window.EMAIL_CONSIGNEE_MAP && setEmailMap(window.EMAIL_CONSIGNEE_MAP);
+    document.body.appendChild(s);
+  }, []);
+
+  useEffect(() => {
+    if (user && Object.keys(emailMap).length) {
+      fetch('/data/shipments.json')
+        .then(r => r.json())
+        .then(data => {
+          const consignee = emailMap[user.email.toLowerCase()];
+          let filtered = data;
+          if (consignee && consignee !== "ALL") {
+            filtered = data.filter(r => 
+              (r.CONSIGNEE || '').trim().toUpperCase() === consignee.trim().toUpperCase()
+            );
+          }
+          setShipments(filtered);
+          setFilteredShipments(filtered);
+        });
+    }
+  }, [user, emailMap]);
+
+  useEffect(() => {
+    if (!searchTerm) setFilteredShipments(shipments);
+    else setFilteredShipments(shipments.filter(r =>
+      Object.values(r).some(v => v?.toString().toLowerCase().includes(searchTerm.toLowerCase()))
+    ));
+  }, [searchTerm, shipments]);
+
+  const handleLogin = e => {
+    e.preventDefault();
+    signInWithEmailAndPassword(auth, email, password)
+      .then(u => setUser(u.user))
+      .catch(err => alert(err.message));
+  };
+
+  const openDocuments = async (shipment) => {
+    const refValue = shipment.REF || shipment.CONTAINER;
+    setSelectedShipment(shipment);
+    setDocsLoading(true);
+    setDocs([]);
+
+    try {
+      const folderRef = ref(storage, `documents/${refValue}`);
+      const result = await listAll(folderRef);
       const urls = await Promise.all(result.items.map(item => getDownloadURL(item)));
       
       const docsList = result.items.map((item, i) => ({
@@ -84,22 +155,22 @@ function App() {
     setDocsLoading(false);
   };
 
-  // Renders checkmark / cross or normal text
+  // Renders actual checkmark and cross symbols
   const renderCell = (value, isRef, onClick) => {
     const str = String(value || '').trim().toLowerCase();
 
     if (str === 'true') {
-      return <span style={{fontSize:'1.6rem', color:'#16a34a'}}>Checkmark</span>;
+      return <span style={{fontSize:'1.8rem', color:'#16a34a', fontWeight:'bold'}}>Checkmark</span>;
     }
     if (str === 'false') {
-      return <span style={{fontSize:'1.6rem', color:'#dc2626'}}>Cross</span>;
+      return <span style={{fontSize:'1.8rem', color:'#dc2626', fontWeight:'bold'}}>Cross</span>;
     }
 
     if (isRef) {
       return <span onClick={onClick} style={{color:'#ea580c', fontWeight:'bold', textDecoration:'underline', cursor:'pointer'}}>{value}</span>;
     }
 
-    return value;
+    return <span>{value}</span>;
   };
 
   if (!user) return (
@@ -178,7 +249,7 @@ function App() {
                   return (
                     <tr key={i} style={{background:i%2===0?'#fdfdfd':'#ffffff', borderTop:'1px solid #f1f5f9'}}>
                       {Object.entries(row).map(([key, cell], j) => (
-                        <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', textAlign:'center'}}>
+                        <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>
                           {renderCell(cell, j === refIndex, () => openDocuments(row))}
                         </td>
                       ))}
@@ -198,7 +269,7 @@ function App() {
                 <h3 style={{fontSize:'1.5rem', fontWeight:'bold', color:'#1e293b'}}>
                   Documents – {selectedShipment.REF || selectedShipment.CONTAINER}
                 </h3>
-                <button onClick={() => {setSelectedShipment(null); setDocs([])}} style={{fontSize:'2rem', color:'#6b7280', background:'none', border:'none', cursor:'pointer'}}>Cross</button>
+                <button onClick={() => {setSelectedShipment(null); setDocs([])}} style={{fontSize:'2.5rem', color:'#6b7280', background:'none', border:'none', cursor:'pointer'}}>Cross</button>
               </div>
               <div style={{padding:'1.5rem', display:'grid', gap:'1rem'}}>
                 {docsLoading ? <div style={{textAlign:'center', padding:'2rem', color:'#64748b'}}>Loading documents...</div>
