@@ -15,6 +15,15 @@ function App() {
   const [docs, setDocs] = useState([]);
   const [docsLoading, setDocsLoading] = useState(false);
 
+  // Set page title + favicon
+  useEffect(() => {
+    document.title = "Pech Fruits Tracker";
+    const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    link.rel = 'icon';
+    link.href = '/favicon.ico';
+    document.head.appendChild(link);
+  }, []);
+
   useEffect(() => {
     const s = document.createElement('script');
     s.src = '/data/email-consignee-map.js'; s.async = true;
@@ -103,31 +112,25 @@ function App() {
 
   return (
     <div style={{minHeight:'100vh', background:'#f8fafc', fontFamily:'system-ui,sans-serif'}}>
-      {/* FINAL HEADER — LOGO CENTERED, TEXT FAR LEFT, LOGOUT FAR RIGHT */}
+      {/* FINAL HEADER */}
       <header style={{background:'white', boxShadow:'0 4px 20px rgba(0,0,0,0.1)', position:'sticky', top:0, zIndex:50}}>
         <div style={{padding:'1rem', position:'relative', minHeight:'80px', display:'flex', alignItems:'center', justifyContent:'center'}}>
-          {/* Centered Logo + Title */}
           <div style={{textAlign:'center', position:'absolute', left:'50%', top:'50%', transform:'translate(-50%, -50%)'}}>
             <img src="/logo.jpg" alt="Pech Fruits" style={{height:'56px', width:'auto', display:'block', margin:'0 auto 0.4rem'}} />
             <h1 style={{fontSize:'1.6rem', fontWeight:'bold', color:'#1e293b', margin:0}}>Pech Fruits Tracker</h1>
           </div>
-
-          {/* Far Left: Logged in as */}
           <div style={{position:'absolute', left:'1rem', top:'50%', transform:'translateY(-50%)', fontSize:'0.95rem', color:'#475569'}}>
             Logged in as <strong style={{color:'#1e293b'}}>{currentConsignee}</strong>
           </div>
-
-          {/* Far Right: Logout */}
           <div style={{position:'absolute', right:'1rem', top:'50%', transform:'translateY(-50%)'}}>
             <button onClick={()=>auth.signOut().then(()=>setUser(null))}
-              style={{background:'#dc2626', color:'white', padding:'0.65rem 1.3rem', borderRadius:'0.6rem', border:'none', fontWeight:'bold', fontSize:'0.95rem', cursor:'pointer'}}>
+              style={{background:'#dc2626', color:'white', padding:'0.65rem 1.3rem', borderRadius:'0.6rem', border:'none', fontWeight:'bold', fontSize:'0.95rem'}}>
               Logout
             </button>
           </div>
         </div>
       </header>
 
-      {/* Rest of the app — unchanged */}
       <div style={{padding:'1rem', width:'100vw', marginLeft:'calc(50% - 50vw)', boxSizing:'border-box'}}>
         <h2 style={{fontSize:'1.8rem', fontWeight:'bold', color:'#1e293b', marginBottom:'1rem', textAlign:'center'}}>
           Live Shipments ({total})
@@ -142,12 +145,13 @@ function App() {
         />
 
         <div style={{background:'white', borderRadius:'1rem', boxShadow:'0 10px 25px rgba(0,0,0,0.1)', overflow:'hidden'}}>
-          <div style={{overflowX:'auto', WebkitOverflowScrolling:'touch'}}>
+          <div style={{maxHeight:'70vh', overflow:'auto', WebkitOverflowScrolling:'touch'}}>
             <table style={{width:'100%', minWidth:'1200px', borderCollapse:'collapse'}}>
-              <thead style={{background:'#f1f5f9', position:'sticky', top:0}}>
+              {/* FROZEN (STICKY) HEADERS */}
+              <thead style={{background:'#f1f5f9', position:'sticky', top:0, zIndex:10, boxShadow:'0 2px 4px rgba(0,0,0,0.05)'}}>
                 <tr>
                   {Object.keys(filteredShipments[0] || {}).map((h, i) => (
-                    <th key={i} style={{padding:'1rem 0.6rem', textAlign:'left', fontSize:'0.85rem', fontWeight:'bold', color:'#1e293b'}}>
+                    <th key={i} style={{padding:'1rem 0.6rem', textAlign:'left', fontSize:'0.85rem', fontWeight:'bold', color:'#1e293b', whiteSpace:'nowrap'}}>
                       {h}
                     </th>
                   ))}
@@ -163,10 +167,7 @@ function App() {
                       {Object.values(row).map((cell, j) => (
                         <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>
                           {j === refIndex ? (
-                            <span
-                              onClick={() => openDocuments(row)}
-                              style={{color:'#ea580c', fontWeight:'bold', textDecoration:'underline', cursor:'pointer'}}
-                            >
+                            <span onClick={() => openDocuments(row)} style={{color:'#ea580c', fontWeight:'bold', textDecoration:'underline', cursor:'pointer'}}>
                               {cell}
                             </span>
                           ) : cell}
@@ -191,34 +192,16 @@ function App() {
                 <button onClick={() => {setSelectedShipment(null); setDocs([])}} style={{fontSize:'2rem', color:'#6b7280', background:'none', border:'none', cursor:'pointer'}}>×</button>
               </div>
               <div style={{padding:'1.5rem', display:'grid', gap:'1rem'}}>
-                {docsLoading ? (
-                  <div style={{textAlign:'center', padding:'2rem', color:'#64748b'}}>Loading documents...</div>
-                ) : docs.length === 0 ? (
-                  <div style={{textAlign:'center', padding:'2rem', color:'#94a3b8'}}>No documents uploaded yet</div>
-                ) : (
-                  docs.map((doc, i) => (
-                    <a
-                      key={i}
-                      href={doc.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        padding:'1.2rem',
-                        background: doc.isOrderConf ? '#f0fdf4' : '#fefce8',
-                        border: doc.isOrderConf ? '2px solid #86efac' : '2px solid #fbbf24',
-                        borderRadius:'1rem',
-                        textAlign:'center',
-                        color: doc.isOrderConf ? '#166534' : '#92400e',
-                        fontWeight:'bold',
-                        textDecoration:'none',
-                        fontSize:'1rem'
-                      }}
-                    >
+                {docsLoading ? <div style={{textAlign:'center', padding:'2rem', color:'#64748b'}}>Loading documents...</div>
+                : docs.length === 0 ? <div style={{textAlign:'center', padding:'2rem', color:'#94a3b8'}}>No documents uploaded yet</div>
+                : docs.map((doc, i) => (
+                    <a key={i} href={doc.url} target="_blank" rel="noopener noreferrer"
+                      style={{padding:'1.2rem', background:doc.isOrderConf?'#f0fdf4':'#fefce8', border:doc.isOrderConf?'2px solid #86efac':'2px solid #fbbf24', borderRadius:'1rem', textAlign:'center', color:doc.isOrderConf?'#166534':'#92400e', fontWeight:'bold', textDecoration:'none', fontSize:'1rem'}}>
                       {doc.isOrderConf ? 'Order Confirmation' : 'Export Document'}<br/>
                       <small style={{fontWeight:'normal', color:'#475569'}}>{doc.name}</small>
                     </a>
                   ))
-                )}
+                }
               </div>
             </div>
           </div>
