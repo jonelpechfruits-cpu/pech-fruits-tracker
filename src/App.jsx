@@ -84,22 +84,22 @@ function App() {
     setDocsLoading(false);
   };
 
-  // REAL CHECKMARK & CROSS — using Unicode symbols
+  // YES / NO with same font size + green/red
   const renderCell = (value, isRef, onClick) => {
     const str = String(value || '').trim().toLowerCase();
 
     if (str === 'true') {
-      return <span style={{fontSize:'1.8rem', color:'#16a34a'}}>Checkmark</span>;
+      return <span style={{color:'#16a34a', fontWeight:'bold', fontSize:'0.9rem'}}>YES</span>;
     }
     if (str === 'false') {
-      return <span style={{fontSize:'1.8rem', color:'#dc2626'}}>Cross</span>;
+      return <span style={{color:'#dc2626', fontWeight:'bold', fontSize:'0.9rem'}}>NO</span>;
     }
 
     if (isRef) {
       return <span onClick={onClick} style={{color:'#ea580c', fontWeight:'bold', textDecoration:'underline', cursor:'pointer'}}>{value}</span>;
     }
 
-    return <span>{value}</span>;
+    return <span style={{fontSize:'0.9rem'}}>{value}</span>;
   };
 
   if (!user) return (
@@ -178,7 +178,7 @@ function App() {
                   return (
                     <tr key={i} style={{background:i%2===0?'#fdfdfd':'#ffffff', borderTop:'1px solid #f1f5f9'}}>
                       {Object.entries(row).map(([key, cell], j) => (
-                        <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>
+                        <td key={j} style={{padding:'0.9rem 0.6rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>
                           {renderCell(cell, j === refIndex, () => openDocuments(row))}
                         </td>
                       ))}
@@ -197,7 +197,7 @@ function App() {
                 <h3 style={{fontSize:'1.5rem', fontWeight:'bold', color:'#1e293b'}}>
                   Documents – {selectedShipment.REF || selectedShipment.CONTAINER}
                 </h3>
-                <button onClick={() => {setSelectedShipment(null); setDocs([])}} style={{fontSize:'2.5rem', color:'#6b7280', background:'none', border:'none', cursor:'pointer'}}>Cross</button>
+                <button onClick={() => {setSelectedShipment(null); setDocs([])}} style={{fontSize:'2.5rem', color:'#6b7280', background:'none', border:'none', cursor:'pointer'}}>×</button>
               </div>
               <div style={{padding:'1.5rem', display:'grid', gap:'1rem'}}>
                 {docsLoading ? <div style={{textAlign:'center', padding:'2rem', color:'#64748b'}}>Loading documents...</div>
