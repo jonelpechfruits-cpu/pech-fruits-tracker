@@ -104,80 +104,59 @@ function App() {
       </header>
 
       <main style={{maxWidth:'1800px', margin:'3rem auto', padding:'0 2rem'}}>
-        <div style={{marginBottom:'2rem', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-          <h2 style={{fontSize:'2.2rem', fontWeight:'bold', color:'#1e293b'}}>Live Shipments ({total})</h2>
-        </div>
+        <h2 style={{fontSize:'2.2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'2rem'}}>Live Shipments ({total})</h2>
 
-        {/* SEARCH BAR — SAME WIDTH AS TABLE */}
-        <div style={{marginBottom:'2rem'}}>
-          <input
-            type="text"
-            placeholder="Search by container, vessel, reference, product, port..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            style={{width:'100%', padding:'1.2rem 1.5rem', border:'1px solid #cbd5e1', borderRadius:'1rem', fontSize:'1.1rem', boxShadow:'0 4px 10px rgba(0,0,0,0.05)'}}
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Search by container, vessel, reference, product, port..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          style={{width:'100%', padding:'1.2rem 1.5rem', marginBottom:'2rem', border:'1px solid #cbd5e1', borderRadius:'1rem', fontSize:'1.1rem', boxShadow:'0 4px 10px rgba(0,0,0,0.05)'}}
+        />
 
-        {/* TABLE WITH SCROLLBAR AT TOP + SAME WIDTH */}
-        {loading ? <p style={{textAlign:'center', padding:'6rem', fontSize:'1.3rem', color:'#64748b'}}>Loading shipments...</p> : (
-          <div style={{background:'white', borderRadius:'1.2rem', boxShadow:'0 15px 35px rgba(0,0,0,0.1)', overflow:'hidden'}}>
-            {/* SCROLLBAR AT THE TOP */}
-            <div style={{overflowX:'auto', direction:'rtl'}}>
-              <div style={{direction:'ltr'}}>
-                <table style={{width:'100%', borderCollapse:'collapse', tableLayout:'fixed', minWidth:'2000px'}}>
-                  <thead style={{background:'#f8fafc', position:'sticky', top:0, zIndex:20}}>
-                    <tr>
-                      {Object.keys(filteredShipments[0] || {}).map(h => {
-                        const widths = {
-                          'NR': '70px', 'VESSEL': '200px', 'CONTAINER': '160px', 'REF': '120px',
-                          'INV': '120px', 'STATUS': '140px', 'CONSIGNEE': '220px', 'PRODUCTS': '240px',
-                          'POL': '130px', 'POD': '130px', 'ETD': '130px', 'LIVE ETA': '130px', 'DOCS': '90px'
-                        };
-                        return (
-                          <th key={h} style={{
-                            padding:'1.3rem 1rem',
-                            textAlign:'left',
-                            fontWeight:'bold',
-                            color:'#1e293b',
-                            fontSize:'0.95rem',
-                            whiteSpace:'nowrap',
-                            width: widths[h] || '140px',
-                            borderBottom:'3px solid #e2e8f0'
-                          }}>
-                            {h}
-                          </th>
-                        );
-                      })}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredShipments.length === 0 ? (
-                      <tr><td colSpan="20" style={{textAlign:'center', padding:'6rem', color:'#94a3b8', fontSize:'1.2rem'}}>No shipments found</td></tr>
-                    ) : (
-                      filteredShipments.map((row, i) => (
-                        <tr key={i} style={{background: i % 2 === 0 ? '#ffffff' : '#fdfdfd', borderBottom:'1px solid #f1f5f9'}}>
-                          {Object.values(row).map((cell, j) => (
-                            <td key={j} style={{
-                              padding:'1.1rem 1rem',
-                              whiteSpace:'nowrap',
-                              overflow:'hidden',
-                              textOverflow:'ellipsis',
-                              color:'#334155',
-                              fontSize:'0.98rem'
-                            }}>
-                              {cell}
-                            </td>
-                          ))}
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        {/* TABLE WITH VISIBLE HORIZONTAL SCROLLBAR AT BOTTOM */}
+        <div style={{background:'white', borderRadius:'1.2rem', boxShadow:'0 15px 35px rgba(0,0,0,0.1)', overflow:'hidden'}}>
+          <div style={{maxWidth:'100%', overflowX:'auto', WebkitOverflowScrolling:'touch'}}>
+            <table style={{width:'100%', minWidth:'2200px', borderCollapse:'collapse', tableLayout:'fixed'}}>
+              <thead style={{background:'#f8fafc', position:'sticky', top:0, zIndex:10}}>
+                <tr>
+                  {Object.keys(filteredShipments[0] || {}).map(h => {
+                    const widths = {
+                      'NR': '70px', 'VESSEL': '220px', 'CONTAINER': '170px', 'REF': '130px',
+                      'INV': '130px', 'STATUS': '150px', 'CONSIGNEE': '240px', 'PRODUCTS': '260px',
+                      'POL': '140px', 'POD': '140px', 'ETD': '140px', 'LIVE ETA': '140px', 'DOCS': '100px'
+                    };
+                    return (
+                      <th key={h} style={{
+                        padding:'1.3rem 1rem', textAlign:'left', fontWeight:'bold', color:'#1e293b',
+                        fontSize:'0.95rem', whiteSpace:'nowrap', width: widths[h] || '150px',
+                        borderBottom:'3px solid #e2e8f0'
+                      }}>
+                        {h}
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredShipments.length === 0 ? (
+                  <tr><td colSpan="20" style={{textAlign:'center', padding:'6rem', color:'#94a3b8', fontSize:'1.2rem'}}>No shipments found</td></tr>
+                ) : filteredShipments.map((row, i) => (
+                  <tr key={i} style={{background: i % 2 === 0 ? '#ffffff' : '#fdfdfd'}}>
+                    {Object.values(row).map((cell, j) => (
+                      <td key={j} style={{
+                        padding:'1.1rem 1rem', whiteSpace:'nowrap', overflow:'hidden',
+                        textOverflow:'ellipsis', color:'#334155', fontSize:'0.98rem'
+                      }}>
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
       </main>
     </div>
   );
