@@ -30,7 +30,7 @@ function App() {
           if (consignee && consignee !== "ALL") {
             filtered = data.filter(r => (r.CONSIGNEE || '').trim().toUpperCase() === consignee.trim().toUpperCase());
           }
-          setShipments(filtered);
+,setShipments(filtered);
           setFilteredShipments(filtered);
           setLoading(false);
         })
@@ -54,7 +54,7 @@ function App() {
 
   if (!user) return (
     <div style={{minHeight:'100vh', background:'linear-gradient(135deg,#f97316,#22c55e)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem'}}>
-      <div style={{background:'white', padding:'3rem', borderRadius:'1.5rem', boxShadow:'0 25px 50px rgba(0,0,0,0.3)', width:'420px', maxWidth:'100%', textAlign:'center'}}>
+      <div style={{background:'white', padding:'3rem', borderRadius:'1.5rem', boxShadow:'0 25px 50px rgba(0,0,0,0.3)', width:'420px', maxWidth:'95%', textAlign:'center'}}>
         <div style={{width:'90px', height:'90px', background:'linear-gradient(to right,#f97316,#22c55e)', borderRadius:'1.2rem', margin:'0 auto 1.5rem'}}></div>
         <h1 style={{fontSize:'2.2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'0.5rem'}}>Pech Fruits Tracker</h1>
         <p style={{color:'#64748b', marginBottom:'2rem'}}>Sign in to view your live shipments</p>
@@ -103,33 +103,63 @@ function App() {
         </div>
       </header>
 
-      <main style={{maxWidth:'1800px', margin:'3rem auto', padding:'0 2rem'}}>
+      <main style={{maxWidth:'1800px', margin:'3rem auto', padding:'0 1.5rem'}}>
         <h2 style={{fontSize:'2.2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'2rem'}}>Live Shipments ({total})</h2>
 
-        <input
-          type="text"
-          placeholder="Search by container, vessel, reference, product, port..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          style={{width:'100%', padding:'1.2rem 1.5rem', marginBottom:'2rem', border:'1px solid #cbd5e1', borderRadius:'1rem', fontSize:'1.1rem', boxShadow:'0 4px 10px rgba(0,0,0,0.05)'}}
-        />
+        {/* SEARCH BAR — EXACT SAME WIDTH AS TABLE */}
+        <div style={{marginBottom:'2rem'}}>
+          <input
+            type="text"
+            placeholder="Search by container, vessel, reference, product, port..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{
+              width:'100%',
+              padding:'1.2rem 1.5rem',
+              border:'1px solid #cbd5e1',
+              borderRadius:'1rem',
+              fontSize:'1.1rem',
+              boxShadow:'0 4px 10px rgba(0,0,0,0.05)',
+              boxSizing:'border-box'
+            }}
+          />
+        </div>
 
-        {/* TABLE WITH VISIBLE HORIZONTAL SCROLLBAR AT BOTTOM */}
-        <div style={{background:'white', borderRadius:'1.2rem', boxShadow:'0 15px 35px rgba(0,0,0,0.1)', overflow:'hidden'}}>
-          <div style={{maxWidth:'100%', overflowX:'auto', WebkitOverflowScrolling:'touch'}}>
-            <table style={{width:'100%', minWidth:'2200px', borderCollapse:'collapse', tableLayout:'fixed'}}>
+        {/* RESPONSIVE TABLE — PERFECT ON PHONE AND DESKTOP */}
+        <div style={{
+          background:'white',
+          borderRadius:'1.2rem',
+          boxShadow:'0 15px 35px rgba(0,0,0,0.1)',
+          overflow:'hidden'
+        }}>
+          <div style={{
+            overflowX:'auto',
+            WebkitOverflowScrolling:'touch',
+            scrollbarWidth:'thin'
+          }}>
+            <table style={{
+              width:'100%',
+              minWidth:'1400px',   /* forces horizontal scroll on mobile */
+              borderCollapse:'collapse',
+              tableLayout:'fixed'
+            }}>
               <thead style={{background:'#f8fafc', position:'sticky', top:0, zIndex:10}}>
                 <tr>
                   {Object.keys(filteredShipments[0] || {}).map(h => {
-                    const widths = {
-                      'NR': '70px', 'VESSEL': '220px', 'CONTAINER': '170px', 'REF': '130px',
-                      'INV': '130px', 'STATUS': '150px', 'CONSIGNEE': '240px', 'PRODUCTS': '260px',
-                      'POL': '140px', 'POD': '140px', 'ETD': '140px', 'LIVE ETA': '140px', 'DOCS': '100px'
+                    const mobileWidths = {
+                      'NR': '60px', 'VESSEL': '150px', 'CONTAINER': '130px', 'REF': '100px',
+                      'INV': '100px', 'STATUS': '110px', 'CONSIGNEE': '160px', 'PRODUCTS': '180px',
+                      'POL': '90px', 'POD': '90px', 'ETD': '110px', 'LIVE ETA': '110px', 'DOCS': '80px'
                     };
                     return (
                       <th key={h} style={{
-                        padding:'1.3rem 1rem', textAlign:'left', fontWeight:'bold', color:'#1e293b',
-                        fontSize:'0.95rem', whiteSpace:'nowrap', width: widths[h] || '150px',
+                        padding:'1.2rem 0.8rem',
+                        textAlign:'left',
+                        fontWeight:'bold',
+                        color:'#1e293b',
+                        fontSize:'0.9rem',
+                        whiteSpace:'nowrap',
+                        width: mobileWidths[h] || '120px',
                         borderBottom:'3px solid #e2e8f0'
                       }}>
                         {h}
@@ -140,13 +170,17 @@ function App() {
               </thead>
               <tbody>
                 {filteredShipments.length === 0 ? (
-                  <tr><td colSpan="20" style={{textAlign:'center', padding:'6rem', color:'#94a3b8', fontSize:'1.2rem'}}>No shipments found</td></tr>
+                  <tr><td colSpan="20" style={{textAlign:'center', padding:'6rem', color:'#94a3b8'}}>No shipments found</td></tr>
                 ) : filteredShipments.map((row, i) => (
                   <tr key={i} style={{background: i % 2 === 0 ? '#ffffff' : '#fdfdfd'}}>
                     {Object.values(row).map((cell, j) => (
                       <td key={j} style={{
-                        padding:'1.1rem 1rem', whiteSpace:'nowrap', overflow:'hidden',
-                        textOverflow:'ellipsis', color:'#334155', fontSize:'0.98rem'
+                        padding:'1rem 0.8rem',
+                        whiteSpace:'nowrap',
+                        overflow:'hidden',
+                        textOverflow:'ellipsis',
+                        color:'#334155',
+                        fontSize:'0.95rem'
                       }}>
                         {cell}
                       </td>
