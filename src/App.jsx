@@ -88,7 +88,7 @@ function App() {
             <div className="flex items-center space-x-12">
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-green-600 rounded-lg mr-3"></div>
-                <h1 className="text-2xl font-bold text-gray-900">Pech Fruits Tracker</h1>
+                <h1 className="text-2xl font-bold text-red-600">Pech Fruits Tracker — TEST VERSION</h1>
               </div>
               <nav className="hidden lg:flex space-x-10">
                 <a href="#" className="text-gray-600 hover:text-orange-600 font-medium transition">Dashboard</a>
