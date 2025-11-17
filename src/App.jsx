@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './firebase';
+import { ref, listAll, getDownloadURL } from 'firebase/storage';
+import { auth, storage } from './firebase';
 
 function App() {
   const [email, setEmail] = useState('');
@@ -12,6 +13,8 @@ function App() {
   const [emailMap, setEmailMap] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedShipment, setSelectedShipment] = useState(null);
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [shipmentDocs, setShipmentDocs] = useState([]);
 
   useEffect(() => {
     const s = document.createElement('script');
@@ -53,6 +56,28 @@ function App() {
     signInWithEmailAndPassword(auth, email, password)
       .then(u => setUser(u.user))
       .catch(err => alert(err.message));
+  };
+
+  // Load documents for selected shipment
+  const loadShipmentDocs = async (shipment) => {
+    setDocsLoading(true);
+    setShipmentDocs([]);
+    const refId = shipment.REF || shipment.CONTAINER || 'unknown';
+    try {
+      const folderRef = ref(storage, `documents/${refId}`);
+      const result = await listAll(folderRef);
+      const urls = await Promise.all(result.items.map(item => getDownloadURL(item)));
+      setShipmentDocs(result.items.map((item, i) => ({
+        name: item.name,
+        url: urls[i],
+        type: item.name.includes('order-confirmation') ? 'Order Confirmation' : 'Export Document'
+      })));
+    } catch (err) {
+      console.error('Docs error:', err);
+      setShipmentDocs([{ name: 'No documents found', type: 'Info' }]);
+    }
+    setDocsLoading(false);
+    setSelectedShipment(shipment);
   };
 
   if (!user) return (
@@ -111,37 +136,31 @@ function App() {
             <table style={{width:'100%', minWidth:'1200px', borderCollapse:'collapse'}}>
               <thead style={{background:'#f1f5f9', position:'sticky', top:0}}>
                 <tr>
-                  {Object.keys(filteredShipments[0] || {}).map(h => (
-                    <th key={h} style={{padding:'1rem 0.6rem', textAlign:'left', fontSize:'0.85rem', fontWeight:'bold', color:'#1e293b', whiteSpace:'nowrap'}}>
-                      {h}
-                    </th>
-                  ))}
+                  {Object.keys(filteredShipments[0] || {}).map((h, i) => {
+                    const isRefColumn = i === 3; // Assuming REF is the 4th column (index 3)
+                    return (
+                      <th 
+                        key={h} 
+                        style={{padding:'1rem 0.6rem', textAlign:'left', fontSize:'0.85rem', fontWeight:'bold', color:'#1e293b', whiteSpace:'nowrap'}}
+                        onClick={isRefColumn ? () => setSelectedShipment(filteredShipments.find(r => r[h] === h)) : undefined}
+                        style={isRefColumn ? {cursor:'pointer', color:'#ea580c'} : {}}
+                      >
+                        {h}
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
-                {filteredShipments.map((row, i) => {
-                  const refValue = row.REF || row.CONTAINER || 'Unknown';
-                  const refIndex = Object.keys(row).find(key => row[key] === refValue);
-
-                  return (
-                    <tr key={i} style={{background:i%2===0?'#fdfdfd':'#ffffff', borderTop:'1px solid #f1f5f9'}}>
-                      {Object.entries(row).map(([key, cell], j) => (
-                        <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>
-                          {key === refIndex ? (
-                            <span
-                              onClick={(e) => { e.stopPropagation(); setSelectedShipment(row); }}
-                              style={{color:'#ea580c', fontWeight:'bold', textDecoration:'underline', cursor:'pointer'}}
-                            >
-                              {cell}
-                            </span>
-                          ) : (
-                            cell
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  );
-                })}
+                {filteredShipments.slice(0, 100).map((row, i) => (
+                  <tr key={i} style={{background:i%2===0?'#fdfdfd':'#ffffff', borderTop:'1px solid #f1f5f9'}}>
+                    {Object.values(row).map((cell, j) => (
+                      <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'150px'}}>
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -158,9 +177,8 @@ function App() {
                 <button onClick={() => setSelectedShipment(null)} style={{fontSize:'2rem', color:'#6b7280', border:'none', background:'none', cursor:'pointer'}}>×</button>
               </div>
               <div style={{padding:'1.5rem', display:'grid', gap:'1rem'}}>
-                {/* Direct link to client's own subfolder */}
                 <a 
-                  href={`https://drive.google.com/drive/folders/1xAfTZm40KfAFWL1nrRd-0a5IEzUelKP1?usp=sharing#folders/${selectedShipment.REF || selectedShipment.CONTAINER}`}
+                  href={`https://drive.google.com/drive/folders/1xAfTZm40KfAFWL1nrRd-0a5IEzUelKP1?usp=sharing/${selectedShipment.REF || selectedShipment.CONTAINER}`}
                   target="_blank" 
                   rel="noopener noreferrer"
                   style={{padding:'1.4rem', background:'#f0f9ff', border:'2px solid #0ea5e9', borderRadius:'1rem', textAlign:'center', color:'#0c4a6e', fontWeight:'bold', textDecoration:'none', fontSize:'1.1rem'}}
