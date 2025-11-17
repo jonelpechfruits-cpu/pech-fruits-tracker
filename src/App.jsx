@@ -106,7 +106,7 @@ function App() {
                 <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-green-600 rounded-lg mr-3"></div>
                 <h1 className="text-2xl font-bold text-gray-800">Pech Fruits Tracker</h1>
               </div>
-              <div className="hidden md:flex space-x-6">
+              <div className="flex items-center space-x-6">
                 <a href="#" className="text-gray-700 font-medium hover:text-orange-600 transition">Dashboard</a>
                 <a href="#" className="text-orange-600 font-semibold border-b-2 border-orange-600">Shipments</a>
                 <a href="#" className="text-gray-700 font-medium hover:text-orange-600 transition">Documents</a>
