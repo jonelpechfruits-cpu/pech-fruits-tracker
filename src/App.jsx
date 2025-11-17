@@ -103,28 +103,31 @@ function App() {
 
   return (
     <div style={{minHeight:'100vh', background:'#f8fafc', fontFamily:'system-ui,sans-serif'}}>
-      {/* CENTERED LOGO HEADER — BEAUTIFUL ON PHONE & DESKTOP */}
+      {/* FINAL HEADER — LOGO CENTERED, TEXT FAR LEFT, LOGOUT FAR RIGHT */}
       <header style={{background:'white', boxShadow:'0 4px 20px rgba(0,0,0,0.1)', position:'sticky', top:0, zIndex:50}}>
-        <div style={{padding:'1rem', display:'flex', flexDirection:'column', alignItems:'center', gap:'0.6rem'}}>
-          {/* Logo + Title Centered */}
-          <div style={{display:'flex', flexDirection:'column', alignItems:'center', gap:'0.4rem'}}>
-            <img src="/logo.jpg" alt="Pech Fruits" style={{height:'56px', width:'auto'}} />
+        <div style={{padding:'1rem', position:'relative', minHeight:'80px', display:'flex', alignItems:'center', justifyContent:'center'}}>
+          {/* Centered Logo + Title */}
+          <div style={{textAlign:'center', position:'absolute', left:'50%', top:'50%', transform:'translate(-50%, -50%)'}}>
+            <img src="/logo.jpg" alt="Pech Fruits" style={{height:'56px', width:'auto', display:'block', margin:'0 auto 0.4rem'}} />
             <h1 style={{fontSize:'1.6rem', fontWeight:'bold', color:'#1e293b', margin:0}}>Pech Fruits Tracker</h1>
           </div>
 
-          {/* Consignee + Logout Row */}
-          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', width:'100%', maxWidth:'600px', flexWrap:'wrap', gap:'1rem'}}>
-            <div style={{fontSize:'0.95rem', color:'#475569'}}>
-              Logged in as <strong style={{color:'#1e293b'}}>{currentConsignee}</strong>
-            </div>
+          {/* Far Left: Logged in as */}
+          <div style={{position:'absolute', left:'1rem', top:'50%', transform:'translateY(-50%)', fontSize:'0.95rem', color:'#475569'}}>
+            Logged in as <strong style={{color:'#1e293b'}}>{currentConsignee}</strong>
+          </div>
+
+          {/* Far Right: Logout */}
+          <div style={{position:'absolute', right:'1rem', top:'50%', transform:'translateY(-50%)'}}>
             <button onClick={()=>auth.signOut().then(()=>setUser(null))}
-              style={{background:'#dc2626', color:'white', padding:'0.6rem 1.2rem', borderRadius:'0.6rem', border:'none', fontWeight:'bold', fontSize:'0.95rem'}}>
+              style={{background:'#dc2626', color:'white', padding:'0.65rem 1.3rem', borderRadius:'0.6rem', border:'none', fontWeight:'bold', fontSize:'0.95rem', cursor:'pointer'}}>
               Logout
             </button>
           </div>
         </div>
       </header>
 
+      {/* Rest of the app — unchanged */}
       <div style={{padding:'1rem', width:'100vw', marginLeft:'calc(50% - 50vw)', boxSizing:'border-box'}}>
         <h2 style={{fontSize:'1.8rem', fontWeight:'bold', color:'#1e293b', marginBottom:'1rem', textAlign:'center'}}>
           Live Shipments ({total})
