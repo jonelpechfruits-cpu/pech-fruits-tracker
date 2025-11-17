@@ -29,7 +29,7 @@ function App() {
     return () => document.body.removeChild(script);
   }, []);
 
-  // Load shipments + filtering
+  // Load and filter shipments
   useEffect(() => {
     if (user && Object.keys(emailMap).length > 0) {
       setLoading(true);
@@ -54,20 +54,19 @@ function App() {
           setShipments(filtered);
           setFilteredShipments(filtered);
           setLoading(false);
-        });
+        })
+        .catch(() => setLoading(false));
     }
   }, [user, emailMap]);
 
-  // Search functionality
+  // Search
   useEffect(() => {
-    if (searchTerm === '') {
+    if (!searchTerm) {
       setFilteredShipments(shipments);
     } else {
       const term = searchTerm.toLowerCase();
       setFilteredShipments(shipments.filter(row =>
-        Object.values(row).some(val =>
-          val.toString().toLowerCase().includes(term)
-        )
+        Object.values(row).some(val => val.toString().toLowerCase().includes(term))
       ));
     }
   }, [searchTerm, shipments]);
@@ -88,7 +87,6 @@ function App() {
   };
 
   const userConsignee = user ? emailMap[user.email.toLowerCase()] || 'Restricted' : '';
-
   const total = filteredShipments.length;
   const delayed = filteredShipments.filter(s => s.STATUS?.includes('Delayed')).length;
   const onTime = total > 0 ? Math.round(((total - delayed) / total) * 100) : 0;
@@ -97,43 +95,48 @@ function App() {
 
   if (user) {
     return (
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-lg">
-  <div className="max-w-7xl mx-auto px-6 py-4">
-    <div className="flex justify-between items-center">
-      {/* Left: Logo + Menu */}
-      <div className="flex items-center space-x-10">
-        <div className="flex items-center">
-          <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-green-600 rounded-lg mr-3"></div>
-          <h1 className="text-2xl font-bold text-gray-800">Pech Fruits Tracker</h1>
-        </div>
-        <div className="hidden md:flex items-center space-x-8">
-          <a href="#" className="text-gray-700 font-medium hover:text-orange-600 transition">Dashboard</a>
-          <a href="#" className="text-orange-600 font-semibold border-b-2 border-orange-600 pb-1">Shipments</a>
-          <a href="#" className="text-gray-700 font-medium hover:text-orange-600 transition">Documents</a>
-        </div>
-      </div>
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-green-50">
+        {/* PROFESSIONAL TOP NAV — PERFECT ALIGNMENT */}
+        <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-lg">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex justify-between items-center">
+              {/* Left */}
+              <div className="flex items-center space-x-10">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-green-600 rounded-lg mr-3"></div>
+                  <h1 className="text-2xl font-bold text-gray-800">Pech Fruits Tracker</h1>
+                </div>
+                <div className="hidden md:flex items-center space-x-8">
+                  <a href="#" className="text-gray-700 font-medium hover:text-orange-600 transition">Dashboard</a>
+                  <a href="#" className="text-orange-600 font-semibold border-b-2 border-orange-600 pb-1">Shipments</a>
+                  <a href="#" className="text-gray-700 font-medium hover:text-orange-600 transition">Documents</a>
+                </div>
+              </div>
 
-      {/* Right: User Info + Logout — NOW CENTERED VERTICALLY */}
-      <div className="flex items-center space-x-6">
-        <div className="text-center">
-          <p className="text-xs text-gray-500">Logged in as</p>
-          <p className="font-semibold text-gray-800">
-            {userConsignee === "ALL" ? "ALL CLIENTS" : userConsignee}
-          </p>
-        </div>
-        <button
-          onClick={() => auth.signOut().then(() => setUser(null))}
-          className="flex items-center space-x-2 bg-red-600 text-white px-5 py-2.5 rounded-lg hover:bg-red-700 transition"
-        >
-          <FiLogOut size={18} />
-          <span className="hidden sm:inline font-medium">Logout</span>
-        </button>
-      </div>
-    </div>
-  </div>
-</nav>
+              {/* Right — PERFECTLY CENTERED */}
+              <div className="flex items-center space-x-6">
+                <div className="text-center">
+                  <p className="text-xs text-gray-500">Logged in as</p>
+                  <p className="font-semibold text-gray-800">
+                    {userConsignee === "ALL" ? "ALL CLIENTS" : userConsignee}
+                  </p>
+                </div>
+                <button
+                  onClick={() => auth.signOut().then(() => setUser(null))}
+                  className="flex items-center space-x-2 bg-red-600 text-white px-5 py-2.5 rounded-lg hover:bg-red-700 transition"
+                >
+                  <FiLogOut size={18} />
+                  <span className="hidden sm:inline font-medium">Logout</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* MAIN CONTENT */}
         <div className="max-w-7xl mx-auto px-6 py-8">
-          {/* KPI Cards */}
+
+          {/* KPI CARDS */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
               <div className="flex items-center justify-between">
@@ -180,7 +183,7 @@ function App() {
             </div>
           </div>
 
-          {/* Search Bar */}
+          {/* SEARCH BAR */}
           <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
             <div className="flex items-center bg-gray-50 rounded-xl px-4 py-3">
               <FiSearch className="text-gray-400 text-xl mr-3" />
@@ -194,7 +197,7 @@ function App() {
             </div>
           </div>
 
-          {/* Table */}
+          {/* TABLE */}
           <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
             <div className="bg-gradient-to-r from-orange-600 to-green-700 px-8 py-5">
               <h2 className="text-2xl font-bold text-white">Live Shipments</h2>
@@ -217,7 +220,6 @@ function App() {
                           'INV': 110, 'STATUS': 130, 'CONSIGNEE': 220, 'PRODUCTS': 240,
                           'POL': 130, 'POD': 130, 'ETD': 120, 'LIVE ETA': 120, 'DOCS': 80
                         }[header] || 140;
-
                         const centered = centeredColumns.includes(header);
 
                         return (
@@ -261,16 +263,15 @@ function App() {
             )}
           </div>
 
-          {/* Footer */}
           <footer className="mt-16 text-center text-gray-500 text-sm">
-            <p>© 2025 Pech Fruits (Pty) Ltd. All rights reserved. | Professional shipment tracking portal</p>
+            <p>© 2025 Pech Fruits (Pty) Ltd. All rights reserved.</p>
           </footer>
         </div>
       </div>
     );
   }
 
-  // Login Screen (clean & professional)
+  // LOGIN SCREEN
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-500 to-green-600 flex items-center justify-center px-4">
       <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full">
@@ -298,13 +299,6 @@ function App() {
             {isLogin ? 'Sign In' : 'Create Account'}
           </button>
         </form>
-
-        <p className="text-center mt-6 text-gray-600">
-          {isLogin ? "Don't have access? " : "Already have an account? "}
-          <button onClick={() => setIsLogin(!isLogin)} className="text-orange-600 font-bold hover:underline">
-            {isLogin ? 'Contact us' : 'Sign in'}
-          </button>
-        </p>
       </div>
     </div>
   );
