@@ -30,7 +30,7 @@ function App() {
           if (consignee && consignee !== "ALL") {
             filtered = data.filter(r => (r.CONSIGNEE || '').trim().toUpperCase() === consignee.trim().toUpperCase());
           }
-,setShipments(filtered);
+setShipments(filtered);
           setFilteredShipments(filtered);
           setLoading(false);
         })
