@@ -15,7 +15,6 @@ function App() {
   const [docs, setDocs] = useState([]);
   const [docsLoading, setDocsLoading] = useState(false);
 
-  // Load email → consignee map
   useEffect(() => {
     const s = document.createElement('script');
     s.src = '/data/email-consignee-map.js'; s.async = true;
@@ -23,7 +22,6 @@ function App() {
     document.body.appendChild(s);
   }, []);
 
-  // Load shipments + filter by logged-in consignee
   useEffect(() => {
     if (user && Object.keys(emailMap).length) {
       fetch('/data/shipments.json')
@@ -42,11 +40,10 @@ function App() {
     }
   }, [user, emailMap]);
 
-  // Search
   useEffect(() => {
     if (!searchTerm) setFilteredShipments(shipments);
     else setFilteredShipments(shipments.filter(r =>
-      Object价值观(r).some(v => v?.toString().toLowerCase().includes(searchTerm.toLowerCase()))
+      Object.values(r).some(v => v?.toString().toLowerCase().includes(searchTerm.toLowerCase()))
     ));
   }, [searchTerm, shipments]);
 
@@ -84,7 +81,7 @@ function App() {
   if (!user) return (
     <div style={{minHeight:'100vh', background:'linear-gradient(135deg,#f97316,#22c55e)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem'}}>
       <div style={{background:'white', padding:'3rem', borderRadius:'1.5rem', boxShadow:'0 25px 50px rgba(0,0,0,0.3)', width:'420px', maxWidth:'95%', textAlign:'center'}}>
-        <img src="/logo.jpg" alt="Pech Fruits" style={{width:'140px', height:'auto', margin:'0 auto 1.5rem', display:'block'}} />
+        <img src="/logo.jpg" alt="Pech Fruits" style={{width:'160px', height:'auto', margin:'0 auto 1.5rem', display:'block'}} />
         <h1 style={{fontSize:'2.2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'0.5rem'}}>Pech Fruits Tracker</h1>
         <p style={{color:'#64748b', marginBottom:'2rem'}}>Sign in to view your live shipments</p>
         <form onSubmit={handleLogin} style={{display:'grid', gap:'1rem'}}>
@@ -101,33 +98,33 @@ function App() {
     </div>
   );
 
-  // Get the actual consignee name from the map
   const currentConsignee = user ? emailMap[user.email.toLowerCase()] || user.email : '';
-
   const total = filteredShipments.length;
 
   return (
     <div style={{minHeight:'100vh', background:'#f8fafc', fontFamily:'system-ui,sans-serif'}}>
-      {/* HEADER — NOW SHOWS CONSIGNEE NAME */}
+      {/* CENTERED LOGO HEADER — BEAUTIFUL ON PHONE & DESKTOP */}
       <header style={{background:'white', boxShadow:'0 4px 20px rgba(0,0,0,0.1)', position:'sticky', top:0, zIndex:50}}>
-        <div style={{padding:'0.8rem 1rem', display:'flex', flexDirection:'column', gap:'0.5rem'}}>
-          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'1rem'}}>
-            <div style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-              <img src="/logo.jpg" alt="Pech Fruits" style={{height:'48px', width:'auto'}} />
-              <h1 style={{fontSize:'1.5rem', fontWeight:'bold', color:'#1e293b', margin:0}}>Pech Fruits Tracker</h1>
+        <div style={{padding:'1rem', display:'flex', flexDirection:'column', alignItems:'center', gap:'0.6rem'}}>
+          {/* Logo + Title Centered */}
+          <div style={{display:'flex', flexDirection:'column', alignItems:'center', gap:'0.4rem'}}>
+            <img src="/logo.jpg" alt="Pech Fruits" style={{height:'56px', width:'auto'}} />
+            <h1 style={{fontSize:'1.6rem', fontWeight:'bold', color:'#1e293b', margin:0}}>Pech Fruits Tracker</h1>
+          </div>
+
+          {/* Consignee + Logout Row */}
+          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', width:'100%', maxWidth:'600px', flexWrap:'wrap', gap:'1rem'}}>
+            <div style={{fontSize:'0.95rem', color:'#475569'}}>
+              Logged in as <strong style={{color:'#1e293b'}}>{currentConsignee}</strong>
             </div>
             <button onClick={()=>auth.signOut().then(()=>setUser(null))}
               style={{background:'#dc2626', color:'white', padding:'0.6rem 1.2rem', borderRadius:'0.6rem', border:'none', fontWeight:'bold', fontSize:'0.95rem'}}>
               Logout
             </button>
           </div>
-          <div style={{fontSize:'0.95rem', color:'#475569', textAlign:'center'}}>
-            Logged in as <strong style={{color:'#1e293b'}}>{currentConsignee}</strong>
-          </div>
         </div>
       </header>
 
-      {/* Rest of the app — unchanged */}
       <div style={{padding:'1rem', width:'100vw', marginLeft:'calc(50% - 50vw)', boxSizing:'border-box'}}>
         <h2 style={{fontSize:'1.8rem', fontWeight:'bold', color:'#1e293b', marginBottom:'1rem', textAlign:'center'}}>
           Live Shipments ({total})
@@ -190,7 +187,6 @@ function App() {
                 </h3>
                 <button onClick={() => {setSelectedShipment(null); setDocs([])}} style={{fontSize:'2rem', color:'#6b7280', background:'none', border:'none', cursor:'pointer'}}>×</button>
               </div>
-
               <div style={{padding:'1.5rem', display:'grid', gap:'1rem'}}>
                 {docsLoading ? (
                   <div style={{textAlign:'center', padding:'2rem', color:'#64748b'}}>Loading documents...</div>
