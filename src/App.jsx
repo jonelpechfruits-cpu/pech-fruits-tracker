@@ -23,7 +23,7 @@ function App() {
     document.body.appendChild(s);
   }, []);
 
-  // Load shipments
+  // Load shipments + filter by logged-in consignee
   useEffect(() => {
     if (user && Object.keys(emailMap).length) {
       fetch('/data/shipments.json')
@@ -46,7 +46,7 @@ function App() {
   useEffect(() => {
     if (!searchTerm) setFilteredShipments(shipments);
     else setFilteredShipments(shipments.filter(r =>
-      Object.values(r).some(v => v?.toString().toLowerCase().includes(searchTerm.toLowerCase()))
+      Object价值观(r).some(v => v?.toString().toLowerCase().includes(searchTerm.toLowerCase()))
     ));
   }, [searchTerm, shipments]);
 
@@ -57,7 +57,6 @@ function App() {
       .catch(err => alert(err.message));
   };
 
-  // Load documents from Firebase Storage
   const openDocuments = async (shipment) => {
     const refValue = shipment.REF || shipment.CONTAINER;
     setSelectedShipment(shipment);
@@ -75,7 +74,7 @@ function App() {
         isOrderConf: item.name.toLowerCase().includes('order')
       }));
 
-      setDocs(docsList.sort((a) => a.isOrderConf ? -1 : 1)); // Order Confirmation first
+      setDocs(docsList.sort((a) => a.isOrderConf ? -1 : 1));
     } catch (err) {
       setDocs([{ name: 'No documents found', url: null }]);
     }
@@ -102,23 +101,33 @@ function App() {
     </div>
   );
 
+  // Get the actual consignee name from the map
+  const currentConsignee = user ? emailMap[user.email.toLowerCase()] || user.email : '';
+
   const total = filteredShipments.length;
 
   return (
     <div style={{minHeight:'100vh', background:'#f8fafc', fontFamily:'system-ui,sans-serif'}}>
+      {/* HEADER — NOW SHOWS CONSIGNEE NAME */}
       <header style={{background:'white', boxShadow:'0 4px 20px rgba(0,0,0,0.1)', position:'sticky', top:0, zIndex:50}}>
-        <div style={{padding:'1rem', display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'1rem'}}>
-          <div style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-            <img src="/logo.jpg" alt="Pech Fruits" style={{height:'52px', width:'auto'}} />
-            <h1 style={{fontSize:'1.6rem', fontWeight:'bold', color:'#1e293b', margin:0}}>Pech Fruits Tracker</h1>
+        <div style={{padding:'0.8rem 1rem', display:'flex', flexDirection:'column', gap:'0.5rem'}}>
+          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'1rem'}}>
+            <div style={{display:'flex', alignItems:'center', gap:'1rem'}}>
+              <img src="/logo.jpg" alt="Pech Fruits" style={{height:'48px', width:'auto'}} />
+              <h1 style={{fontSize:'1.5rem', fontWeight:'bold', color:'#1e293b', margin:0}}>Pech Fruits Tracker</h1>
+            </div>
+            <button onClick={()=>auth.signOut().then(()=>setUser(null))}
+              style={{background:'#dc2626', color:'white', padding:'0.6rem 1.2rem', borderRadius:'0.6rem', border:'none', fontWeight:'bold', fontSize:'0.95rem'}}>
+              Logout
+            </button>
           </div>
-          <button onClick={()=>auth.signOut().then(()=>setUser(null))}
-            style={{background:'#dc2626', color:'white', padding:'0.7rem 1.3rem', borderRadius:'0.7rem', border:'none', fontWeight:'bold'}}>
-            Logout
-          </button>
+          <div style={{fontSize:'0.95rem', color:'#475569', textAlign:'center'}}>
+            Logged in as <strong style={{color:'#1e293b'}}>{currentConsignee}</strong>
+          </div>
         </div>
       </header>
 
+      {/* Rest of the app — unchanged */}
       <div style={{padding:'1rem', width:'100vw', marginLeft:'calc(50% - 50vw)', boxSizing:'border-box'}}>
         <h2 style={{fontSize:'1.8rem', fontWeight:'bold', color:'#1e293b', marginBottom:'1rem', textAlign:'center'}}>
           Live Shipments ({total})
@@ -171,7 +180,7 @@ function App() {
           </div>
         </div>
 
-        {/* DOCUMENTS MODAL — 100% FIREBASE STORAGE */}
+        {/* DOCUMENTS MODAL — unchanged */}
         {selectedShipment && (
           <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:'1rem'}}>
             <div style={{background:'white', borderRadius:'1.5rem', width:'90%', maxWidth:'500px', maxHeight:'90vh', overflow:'auto', boxShadow:'0 25px 60px rgba(0,0,0,0.4)'}}>
