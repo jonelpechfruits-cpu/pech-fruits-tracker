@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { ref, listAll, getDownloadURL } from 'firebase/storage';
-import { auth, storage } from './firebase';
+import { auth } from './firebase';
 
 function App() {
   const [email, setEmail] = useState('');
@@ -13,8 +12,6 @@ function App() {
   const [emailMap, setEmailMap] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedShipment, setSelectedShipment] = useState(null);
-  const [docsLoading, setDocsLoading] = useState(false);
-  const [shipmentDocs, setShipmentDocs] = useState([]);
 
   useEffect(() => {
     const s = document.createElement('script');
@@ -58,28 +55,6 @@ function App() {
       .catch(err => alert(err.message));
   };
 
-  // Load documents for selected shipment
-  const loadShipmentDocs = async (shipment) => {
-    setDocsLoading(true);
-    setShipmentDocs([]);
-    const refId = shipment.REF || shipment.CONTAINER || 'unknown';
-    try {
-      const folderRef = ref(storage, `documents/${refId}`);
-      const result = await listAll(folderRef);
-      const urls = await Promise.all(result.items.map(item => getDownloadURL(item)));
-      setShipmentDocs(result.items.map((item, i) => ({
-        name: item.name,
-        url: urls[i],
-        type: item.name.includes('order-confirmation') ? 'Order Confirmation' : 'Export Document'
-      })));
-    } catch (err) {
-      console.error('Docs error:', err);
-      setShipmentDocs([{ name: 'No documents found', type: 'Info' }]);
-    }
-    setDocsLoading(false);
-    setSelectedShipment(shipment);
-  };
-
   if (!user) return (
     <div style={{minHeight:'100vh', background:'linear-gradient(135deg,#f97316,#22c55e)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem'}}>
       <div style={{background:'white', padding:'3rem', borderRadius:'1.5rem', boxShadow:'0 25px 50px rgba(0,0,0,0.3)', width:'420px', maxWidth:'95%', textAlign:'center'}}>
@@ -100,7 +75,6 @@ function App() {
     </div>
   );
 
-  const userConsignee = emailMap[user.email.toLowerCase()] || 'Restricted';
   const total = filteredShipments.length;
 
   return (
@@ -136,37 +110,49 @@ function App() {
             <table style={{width:'100%', minWidth:'1200px', borderCollapse:'collapse'}}>
               <thead style={{background:'#f1f5f9', position:'sticky', top:0}}>
                 <tr>
-                  {Object.keys(filteredShipments[0] || {}).map((h, i) => {
-                    const isRefColumn = i === 3; // Assuming REF is the 4th column (index 3)
-                    return (
-                      <th 
-                        key={h} 
-                        style={{padding:'1rem 0.6rem', textAlign:'left', fontSize:'0.85rem', fontWeight:'bold', color:'#1e293b', whiteSpace:'nowrap'}}
-                        onClick={isRefColumn ? () => setSelectedShipment(filteredShipments.find(r => r[h] === h)) : undefined}
-                        style={isRefColumn ? {cursor:'pointer', color:'#ea580c'} : {}}
-                      >
-                        {h}
-                      </th>
-                    );
-                  })}
+                  {Object.keys(filteredShipments[0] || {}).map((header, idx) => (
+                    <th key={idx} style={{padding:'1rem 0.6rem', textAlign:'left', fontSize:'0.85rem', fontWeight:'bold', color:'#1e293b', whiteSpace:'nowrap'}}>
+                      {header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {filteredShipments.slice(0, 100).map((row, i) => (
-                  <tr key={i} style={{background:i%2===0?'#fdfdfd':'#ffffff', borderTop:'1px solid #f1f5f9'}}>
-                    {Object.values(row).map((cell, j) => (
-                      <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'150px'}}>
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+                {filteredShipments.map((row, i) => {
+                  const refValue = row.REF || row.CONTAINER || '';
+                  const refIndex = Object.keys(row).findIndex(k => row[k] === refValue);
+
+                  return (
+                    <tr key={i} style={{background:i%2===0?'#fdfdfd':'#ffffff', borderTop:'1px solid #f1f5f9'}}>
+                      {Object.values(row).map((cell, j) => (
+                        <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'200px'}}>
+                          {j === refIndex ? (
+                            <span
+                              onClick={() => setSelectedShipment(row)}
+                              style={{
+                                color:'#ea580c',
+                                fontWeight:'bold',
+                                textDecoration:'underline',
+                                cursor:'pointer',
+                                userSelect:'none'
+                              }}
+                            >
+                              {cell}
+                            </span>
+                          ) : (
+                            cell
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* DOCUMENTS MODAL */}
+        {/* DOCUMENTS MODAL — OPENS PRIVATE SUBFOLDER */}
         {selectedShipment && (
           <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:'1rem'}}>
             <div style={{background:'white', borderRadius:'1.5rem', width:'90%', maxWidth:'500px', maxHeight:'90vh', overflow:'auto', boxShadow:'0 25px 60px rgba(0,0,0,0.4)'}}>
@@ -174,20 +160,20 @@ function App() {
                 <h3 style={{fontSize:'1.5rem', fontWeight:'bold', color:'#1e293b'}}>
                   Documents – {selectedShipment.REF || selectedShipment.CONTAINER}
                 </h3>
-                <button onClick={() => setSelectedShipment(null)} style={{fontSize:'2rem', color:'#6b7280', border:'none', background:'none', cursor:'pointer'}}>×</button>
+                <button onClick={() => setSelectedShipment(null)} style={{fontSize:'2.2rem', color:'#6b7280', border:'none', background:'none', cursor:'pointer'}}>×</button>
               </div>
-              <div style={{padding:'1.5rem', display:'grid', gap:'1rem'}}>
+              <div style={{padding:'1.5rem', display:'grid', gap:'1.2rem'}}>
                 <a 
-                  href={`https://drive.google.com/drive/folders/1xAfTZm40KfAFWL1nrRd-0a5IEzUelKP1?usp=sharing/${selectedShipment.REF || selectedShipment.CONTAINER}`}
+                  href={`https://drive.google.com/drive/folders/1xAfTZm40KfAFWL1nrRd-0a5IEzUelKP1?usp=sharing#folders/${selectedShipment.REF || selectedShipment.CONTAINER}`}
                   target="_blank" 
                   rel="noopener noreferrer"
-                  style={{padding:'1.4rem', background:'#f0f9ff', border:'2px solid #0ea5e9', borderRadius:'1rem', textAlign:'center', color:'#0c4a6e', fontWeight:'bold', textDecoration:'none', fontSize:'1.1rem'}}
+                  style={{padding:'1.4rem', background:'#ecfdf5', border:'2px solid #10b981', borderRadius:'1rem', textAlign:'center', color:'#166534', fontWeight:'bold', textDecoration:'none', fontSize:'1.1rem'}}
                 >
-                  Open All Documents (Order Conf + Export Docs)
+                  Open All Documents (Order Confirmation + Export Docs)
                 </a>
               </div>
               <div style={{padding:'0 1.5rem 1.5rem', fontSize:'0.9rem', color:'#6b7280', textAlign:'center'}}>
-                All your documents are in one private folder – updated in real time
+                Your private folder — only you can access it
               </div>
             </div>
           </div>
