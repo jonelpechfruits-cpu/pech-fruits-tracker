@@ -28,9 +28,11 @@ function App() {
           const consignee = emailMap[user.email.toLowerCase()];
           let filtered = data;
           if (consignee && consignee !== "ALL") {
-            filtered = data.filter(r => (r.CONSIGNEE || '').trim().toUpperCase() === consignee.trim().toUpperCase());
+            filtered = data.filter(r => 
+              (r.CONSIGNEE || '').trim().toUpperCase() === consignee.trim().toUpperCase()
+            );
           }
-setShipments(filtered);
+          setShipments(filtered);
           setFilteredShipments(filtered);
           setLoading(false);
         })
@@ -103,98 +105,29 @@ setShipments(filtered);
         </div>
       </header>
 
-            <main style={{
-        margin:'3rem auto',
-        padding:'0 1rem',
-        maxWidth:'100vw',        // this is the key
-        boxSizing:'border-box'
-      }}>
+      <main style={{margin:'3rem auto', padding:'0 1rem', maxWidth:'100vw', boxSizing:'border-box'}}>
         <h2 style={{fontSize:'2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'2rem', textAlign:'center'}}>
           Live Shipments ({total})
         </h2>
 
-        {/* SEARCH BAR — ALWAYS FULL WIDTH */}
-        <div style={{marginBottom:'2rem', width:'100%', boxSizing:'border-box'}}>
+        <div style={{marginBottom:'2rem'}}>
           <input
             type="text"
             placeholder="Search by container, vessel, reference, product, port..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            style={{
-              width:'100%',
-              padding:'1.2rem 1.5rem',
-              border:'1px solid #cbd5e1',
-              borderRadius:'1rem',
-              fontSize:'1.1rem',
-              boxShadow:'0 4px 10px rgba(0,0,0,0.05)',
-              boxSizing:'border-box'
-            }}
+            style={{width:'100%', padding:'1.2rem 1.5rem', border:'1px solid #cbd5e1', borderRadius:'1rem', fontSize:'1.1rem', boxShadow:'0 4px 10px rgba(0,0,0,0.05)', boxSizing:'border-box'}}
           />
         </div>
 
-        {/* TABLE — ALWAYS CENTERED EVEN WHEN ZOOMED OUT */}
-        <div style={{
-          background:'white',
-          borderRadius:'1.2rem',
-          boxShadow:'0 15px 35px rgba(0,0,0,0.1)',
-          overflow:'hidden',
-          width:'100%',
-          maxWidth:'100%',
-          margin:'0 auto'
-        }}>
-          <div style={{
-            overflowX:'auto',
-            WebkitOverflowScrolling:'touch',
-            width:'100%',
-            minWidth:'1400px'  // forces horizontal scroll on small screens
-          }}>
-            <table style={{
-              width:'100%',
-              borderCollapse:'collapse',
-              tableLayout:'fixed'
-            }}>
-              {/* ... your existing <thead> and <tbody> stay 100% the same ... */}
-
-        {/* RESPONSIVE TABLE — PERFECT ON PHONE AND DESKTOP */}
-        <div style={{
-          background:'white',
-          borderRadius:'1.2rem',
-          boxShadow:'0 15px 35px rgba(0,0,0,0.1)',
-          overflow:'hidden'
-        }}>
-          <div style={{
-            overflowX:'auto',
-            WebkitOverflowScrolling:'touch',
-            scrollbarWidth:'thin'
-          }}>
-            <table style={{
-              width:'100%',
-              minWidth:'1400px',   /* forces horizontal scroll on mobile */
-              borderCollapse:'collapse',
-              tableLayout:'fixed'
-            }}>
+        <div style={{background:'white', borderRadius:'1.2rem', boxShadow:'0 15px 35px rgba(0,0,0,0.1)', overflow:'hidden', width:'100%', margin:'0 auto'}}>
+          <div style={{overflowX:'auto', WebkitOverflowScrolling:'touch', minWidth:'1400px'}}>
+            <table style={{width:'100%', borderCollapse:'collapse', tableLayout:'fixed'}}>
               <thead style={{background:'#f8fafc', position:'sticky', top:0, zIndex:10}}>
                 <tr>
                   {Object.keys(filteredShipments[0] || {}).map(h => {
-                    const mobileWidths = {
-                      'NR': '60px', 'VESSEL': '150px', 'CONTAINER': '130px', 'REF': '100px',
-                      'INV': '100px', 'STATUS': '110px', 'CONSIGNEE': '160px', 'PRODUCTS': '180px',
-                      'POL': '90px', 'POD': '90px', 'ETD': '110px', 'LIVE ETA': '110px', 'DOCS': '80px'
-                    };
-                    return (
-                      <th key={h} style={{
-                        padding:'1.2rem 0.8rem',
-                        textAlign:'left',
-                        fontWeight:'bold',
-                        color:'#1e293b',
-                        fontSize:'0.9rem',
-                        whiteSpace:'nowrap',
-                        width: mobileWidths[h] || '120px',
-                        borderBottom:'3px solid #e2e8f0'
-                      }}>
-                        {h}
-                      </th>
-                    );
+                    const w = {'NR':'60px','VESSEL':'150px','CONTAINER':'130px','REF':'100px','INV':'100px','STATUS':'110px','CONSIGNEE':'160px','PRODUCTS':'180px','POL':'90px','POD':'90px','ETD':'110px','LIVE ETA':'110px','DOCS':'80px'};
+                    return <th key={h} style={{padding:'1.2rem 0.8rem', textAlign:'left', fontWeight:'bold', color:'#1e293b', fontSize:'0.9rem', whiteSpace:'nowrap', width:w[h]||'120px', borderBottom:'3px solid #e2e8f0'}}>{h}</th>;
                   })}
                 </tr>
               </thead>
@@ -202,16 +135,9 @@ setShipments(filtered);
                 {filteredShipments.length === 0 ? (
                   <tr><td colSpan="20" style={{textAlign:'center', padding:'6rem', color:'#94a3b8'}}>No shipments found</td></tr>
                 ) : filteredShipments.map((row, i) => (
-                  <tr key={i} style={{background: i % 2 === 0 ? '#ffffff' : '#fdfdfd'}}>
+                  <tr key={i} style={{background:i%2===0?'#ffffff':'#fdfdfd'}}>
                     {Object.values(row).map((cell, j) => (
-                      <td key={j} style={{
-                        padding:'1rem 0.8rem',
-                        whiteSpace:'nowrap',
-                        overflow:'hidden',
-                        textOverflow:'ellipsis',
-                        color:'#334155',
-                        fontSize:'0.95rem'
-                      }}>
+                      <td key={j} style={{padding:'1rem 0.8rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#334155', fontSize:'0.95rem'}}>
                         {cell}
                       </td>
                     ))}
