@@ -79,65 +79,51 @@ function App() {
 
   return (
     <div style={{minHeight:'100vh', background:'#f8fafc', fontFamily:'system-ui,sans-serif'}}>
+      {/* HEADER */}
       <header style={{background:'white', boxShadow:'0 4px 20px rgba(0,0,0,0.1)', position:'sticky', top:0, zIndex:50}}>
-        <div style={{maxWidth:'1800px', margin:'0 auto', padding:'1.2rem 2rem', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-          <div style={{display:'flex', alignItems:'center', gap:'4rem'}}>
-            <div style={{display:'flex', alignItems:'center', gap:'1rem'}}>
-              <div style={{width:'48px', height:'48px', background:'linear-gradient(to right,#f97316,#22c55e)', borderRadius:'12px'}}></div>
-              <h1 style={{fontSize:'2rem', fontWeight:'bold', color:'#1e293b'}}>Pech Fruits Tracker</h1>
-            </div>
-            <nav style={{display:'flex', gap:'2.5rem'}}>
-              <a href="#" style={{color:'#475569', fontWeight:'600', fontSize:'1.1rem'}}>Dashboard</a>
-              <a href="#" style={{color:'#ea580c', fontWeight:'bold', fontSize:'1.1rem', borderBottom:'4px solid #ea580c', paddingBottom:'0.4rem'}}>Shipments</a>
-              <a href="#" style={{color:'#475569', fontWeight:'600', fontSize:'1.1rem'}}>Documents</a>
-            </nav>
+        <div style={{padding:'1rem', display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'1rem'}}>
+          <div style={{display:'flex', alignItems:'center', gap:'1rem'}}>
+            <div style={{width:'40px', height:'40px', background:'linear-gradient(to right,#f97316,#22c55e)', borderRadius:'10px'}}></div>
+            <h1 style={{fontSize:'1.5rem', fontWeight:'bold', color:'#1e293b'}}>Pech Fruits Tracker</h1>
           </div>
-          <div style={{display:'flex', alignItems:'center', gap:'2.5rem'}}>
-            <div style={{textAlign:'right'}}>
-              <div style={{fontSize:'0.9rem', color:'#64748b'}}>Logged in as</div>
-              <div style={{fontWeight:'bold', color:'#1e293b', fontSize:'1.1rem'}}>{userConsignee === 'ALL' ? 'ALL CLIENTS' : userConsignee}</div>
-            </div>
-            <button onClick={()=>auth.signOut().then(()=>setUser(null))}
-              style={{background:'#dc2626', color:'white', padding:'0.9rem 1.8rem', borderRadius:'0.8rem', border:'none', fontWeight:'bold', fontSize:'1rem', cursor:'pointer'}}>
-              Logout
-            </button>
-          </div>
+          <button onClick={()=>auth.signOut().then(()=>setUser(null))}
+            style={{background:'#dc2626', color:'white', padding:'0.6rem 1.2rem', borderRadius:'0.6rem', border:'none', fontWeight:'bold'}}>
+            Logout
+          </button>
         </div>
       </header>
 
-      <main style={{margin:'3rem auto', padding:'0 1rem', maxWidth:'100vw', boxSizing:'border-box'}}>
-        <h2 style={{fontSize:'2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'2rem', textAlign:'center'}}>
+      {/* FULL-SCREEN CONTENT — NO MARGINS ON MOBILE */}
+      <div style={{padding:'1rem', width:'100vw', marginLeft:'calc(50% - 50vw)', boxSizing:'border-box'}}>
+        <h2 style={{fontSize:'1.8rem', fontWeight:'bold', color:'#1e293b', marginBottom:'1rem', textAlign:'center'}}>
           Live Shipments ({total})
         </h2>
 
-        <div style={{marginBottom:'2rem'}}>
-          <input
-            type="text"
-            placeholder="Search by container, vessel, reference, product, port..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            style={{width:'100%', padding:'1.2rem 1.5rem', border:'1px solid #cbd5e1', borderRadius:'1rem', fontSize:'1.1rem', boxShadow:'0 4px 10px rgba(0,0,0,0.05)', boxSizing:'border-box'}}
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Search anything..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          style={{width:'100%', padding:'1rem', marginBottom:'1.5rem', border:'1px solid #cbd5e1', borderRadius:'1rem', fontSize:'1rem', boxSizing:'border-box'}}
+        />
 
-        <div style={{background:'white', borderRadius:'1.2rem', boxShadow:'0 15px 35px rgba(0,0,0,0.1)', overflow:'hidden', width:'100%', margin:'0 auto'}}>
-          <div style={{overflowX:'auto', WebkitOverflowScrolling:'touch', minWidth:'1400px'}}>
-            <table style={{width:'100%', borderCollapse:'collapse', tableLayout:'fixed'}}>
-              <thead style={{background:'#f8fafc', position:'sticky', top:0, zIndex:10}}>
+        <div style={{background:'white', borderRadius:'1rem', boxShadow:'0 10px 25px rgba(0,0,0,0.1)', overflow:'hidden'}}>
+          <div style={{overflowX:'auto', WebkitOverflowScrolling:'touch'}}>
+            <table style={{width:'100%', minWidth:'1200px', borderCollapse:'collapse'}}>
+              <thead style={{background:'#f1f5f9', position:'sticky', top:0}}>
                 <tr>
-                  {Object.keys(filteredShipments[0] || {}).map(h => {
-                    const w = {'NR':'60px','VESSEL':'150px','CONTAINER':'130px','REF':'100px','INV':'100px','STATUS':'110px','CONSIGNEE':'160px','PRODUCTS':'180px','POL':'90px','POD':'90px','ETD':'110px','LIVE ETA':'110px','DOCS':'80px'};
-                    return <th key={h} style={{padding:'1.2rem 0.8rem', textAlign:'left', fontWeight:'bold', color:'#1e293b', fontSize:'0.9rem', whiteSpace:'nowrap', width:w[h]||'120px', borderBottom:'3px solid #e2e8f0'}}>{h}</th>;
-                  })}
+                  {Object.keys(filteredShipments[0] || {}).map(h => (
+                    <th key={h} style={{padding:'1rem 0.6rem', textAlign:'left', fontSize:'0.85rem', fontWeight:'bold', color:'#1e293b', whiteSpace:'nowrap'}}>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {filteredShipments.length === 0 ? (
-                  <tr><td colSpan="20" style={{textAlign:'center', padding:'6rem', color:'#94a3b8'}}>No shipments found</td></tr>
-                ) : filteredShipments.map((row, i) => (
-                  <tr key={i} style={{background:i%2===0?'#ffffff':'#fdfdfd'}}>
+                {filteredShipments.slice(0, 100).map((row, i) => (
+                  <tr key={i} style={{background:i%2===0?'#fdfdfd':'#ffffff', borderTop:'1px solid #f1f5f9'}}>
                     {Object.values(row).map((cell, j) => (
-                      <td key={j} style={{padding:'1rem 0.8rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'#334155', fontSize:'0.95rem'}}>
+                      <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'150px'}}>
                         {cell}
                       </td>
                     ))}
@@ -147,7 +133,7 @@ function App() {
             </table>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
