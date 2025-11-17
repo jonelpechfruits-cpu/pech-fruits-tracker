@@ -97,35 +97,41 @@ function App() {
 
   if (user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-green-50">
-        {/* Sticky Professional Nav */}
-        <nav className="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-gray-200 shadow-lg">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-green-600 rounded-lg mr-3"></div>
-                <h1 className="text-2xl font-bold text-gray-800">Pech Fruits Tracker</h1>
-              </div>
-              <div className="flex items-center space-x-6">
-                <a href="#" className="text-gray-700 font-medium hover:text-orange-600 transition">Dashboard</a>
-                <a href="#" className="text-orange-600 font-semibold border-b-2 border-orange-600">Shipments</a>
-                <a href="#" className="text-gray-700 font-medium hover:text-orange-600 transition">Documents</a>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600 hidden sm:block">
-                {userConsignee === "ALL" ? "ALL CLIENTS" : userConsignee}
-              </span>
-              <button
-                onClick={() => auth.signOut().then(() => setUser(null))}
-                className="flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
-              >
-                <FiLogOut /> <span className="hidden sm:inline">Logout</span>
-              </button>
-            </div>
-          </div>
-        </nav>
+      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-lg">
+  <div className="max-w-7xl mx-auto px-6 py-4">
+    <div className="flex justify-between items-center">
+      {/* Left: Logo + Menu */}
+      <div className="flex items-center space-x-10">
+        <div className="flex items-center">
+          <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-green-600 rounded-lg mr-3"></div>
+          <h1 className="text-2xl font-bold text-gray-800">Pech Fruits Tracker</h1>
+        </div>
+        <div className="hidden md:flex items-center space-x-8">
+          <a href="#" className="text-gray-700 font-medium hover:text-orange-600 transition">Dashboard</a>
+          <a href="#" className="text-orange-600 font-semibold border-b-2 border-orange-600 pb-1">Shipments</a>
+          <a href="#" className="text-gray-700 font-medium hover:text-orange-600 transition">Documents</a>
+        </div>
+      </div>
 
+      {/* Right: User Info + Logout — NOW CENTERED VERTICALLY */}
+      <div className="flex items-center space-x-6">
+        <div className="text-center">
+          <p className="text-xs text-gray-500">Logged in as</p>
+          <p className="font-semibold text-gray-800">
+            {userConsignee === "ALL" ? "ALL CLIENTS" : userConsignee}
+          </p>
+        </div>
+        <button
+          onClick={() => auth.signOut().then(() => setUser(null))}
+          className="flex items-center space-x-2 bg-red-600 text-white px-5 py-2.5 rounded-lg hover:bg-red-700 transition"
+        >
+          <FiLogOut size={18} />
+          <span className="hidden sm:inline font-medium">Logout</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
         <div className="max-w-7xl mx-auto px-6 py-8">
           {/* KPI Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
