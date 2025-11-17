@@ -15,13 +15,10 @@ function App() {
   const [docs, setDocs] = useState([]);
   const [docsLoading, setDocsLoading] = useState(false);
 
-  // Set page title + favicon
   useEffect(() => {
     document.title = "Pech Fruits Tracker";
     const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-    link.rel = 'icon';
-    link.href = '/favicon.ico';
-    document.head.appendChild(link);
+    link.rel = 'icon'; link.href = '/favicon.ico'; document.head.appendChild(link);
   }, []);
 
   useEffect(() => {
@@ -87,6 +84,22 @@ function App() {
     setDocsLoading(false);
   };
 
+  // Helper to render boolean as tick/cross
+  const renderCell = (value, isRef, onClick) => {
+    const str = String(value || '').trim().toLowerCase();
+    if (str === 'true') {
+      return <span style={{color:'#16a34a', fontWeight:'bold', fontSize:'1.4rem'}}>Yes</span>;
+    }
+    if (str === 'false') {
+      return <span style={{color:'#dc2626', fontWeight:'bold', fontSize:'1.4rem'}}>No</span>;
+    }
+    // If it's the REF column
+    if (isRef) {
+      return <span onClick={onClick} style={{color:'#ea580c', fontWeight:'bold', textDecoration:'underline', cursor:'pointer'}}>{value}</span>;
+    }
+    return value;
+  };
+
   if (!user) return (
     <div style={{minHeight:'100vh', background:'linear-gradient(135deg,#f97316,#22c55e)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem'}}>
       <div style={{background:'white', padding:'3rem', borderRadius:'1.5rem', boxShadow:'0 25px 50px rgba(0,0,0,0.3)', width:'420px', maxWidth:'95%', textAlign:'center'}}>
@@ -112,7 +125,6 @@ function App() {
 
   return (
     <div style={{minHeight:'100vh', background:'#f8fafc', fontFamily:'system-ui,sans-serif'}}>
-      {/* FINAL HEADER */}
       <header style={{background:'white', boxShadow:'0 4px 20px rgba(0,0,0,0.1)', position:'sticky', top:0, zIndex:50}}>
         <div style={{padding:'1rem', position:'relative', minHeight:'80px', display:'flex', alignItems:'center', justifyContent:'center'}}>
           <div style={{textAlign:'center', position:'absolute', left:'50%', top:'50%', transform:'translate(-50%, -50%)'}}>
@@ -145,9 +157,8 @@ function App() {
         />
 
         <div style={{background:'white', borderRadius:'1rem', boxShadow:'0 10px 25px rgba(0,0,0,0.1)', overflow:'hidden'}}>
-          <div style={{maxHeight:'70vh', overflow:'auto', WebkitOverflowScrolling:'touch'}}>
+          <div style={{maxHeight:'70vh', overflow:'auto'}}>
             <table style={{width:'100%', minWidth:'1200px', borderCollapse:'collapse'}}>
-              {/* FROZEN (STICKY) HEADERS */}
               <thead style={{background:'#f1f5f9', position:'sticky', top:0, zIndex:10, boxShadow:'0 2px 4px rgba(0,0,0,0.05)'}}>
                 <tr>
                   {Object.keys(filteredShipments[0] || {}).map((h, i) => (
@@ -164,13 +175,9 @@ function App() {
 
                   return (
                     <tr key={i} style={{background:i%2===0?'#fdfdfd':'#ffffff', borderTop:'1px solid #f1f5f9'}}>
-                      {Object.values(row).map((cell, j) => (
-                        <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>
-                          {j === refIndex ? (
-                            <span onClick={() => openDocuments(row)} style={{color:'#ea580c', fontWeight:'bold', textDecoration:'underline', cursor:'pointer'}}>
-                              {cell}
-                            </span>
-                          ) : cell}
+                      {Object.entries(row).map(([key, cell], j) => (
+                        <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', textAlign:'center'}}>
+                          {renderCell(cell, j === refIndex, () => openDocuments(row))}
                         </td>
                       ))}
                     </tr>
