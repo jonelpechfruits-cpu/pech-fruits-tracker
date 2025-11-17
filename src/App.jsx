@@ -103,11 +103,18 @@ setShipments(filtered);
         </div>
       </header>
 
-      <main style={{maxWidth:'1800px', margin:'3rem auto', padding:'0 1.5rem'}}>
-        <h2 style={{fontSize:'2.2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'2rem'}}>Live Shipments ({total})</h2>
+            <main style={{
+        margin:'3rem auto',
+        padding:'0 1rem',
+        maxWidth:'100vw',        // this is the key
+        boxSizing:'border-box'
+      }}>
+        <h2 style={{fontSize:'2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'2rem', textAlign:'center'}}>
+          Live Shipments ({total})
+        </h2>
 
-        {/* SEARCH BAR — EXACT SAME WIDTH AS TABLE */}
-        <div style={{marginBottom:'2rem'}}>
+        {/* SEARCH BAR — ALWAYS FULL WIDTH */}
+        <div style={{marginBottom:'2rem', width:'100%', boxSizing:'border-box'}}>
           <input
             type="text"
             placeholder="Search by container, vessel, reference, product, port..."
@@ -124,6 +131,29 @@ setShipments(filtered);
             }}
           />
         </div>
+
+        {/* TABLE — ALWAYS CENTERED EVEN WHEN ZOOMED OUT */}
+        <div style={{
+          background:'white',
+          borderRadius:'1.2rem',
+          boxShadow:'0 15px 35px rgba(0,0,0,0.1)',
+          overflow:'hidden',
+          width:'100%',
+          maxWidth:'100%',
+          margin:'0 auto'
+        }}>
+          <div style={{
+            overflowX:'auto',
+            WebkitOverflowScrolling:'touch',
+            width:'100%',
+            minWidth:'1400px'  // forces horizontal scroll on small screens
+          }}>
+            <table style={{
+              width:'100%',
+              borderCollapse:'collapse',
+              tableLayout:'fixed'
+            }}>
+              {/* ... your existing <thead> and <tbody> stay 100% the same ... */}
 
         {/* RESPONSIVE TABLE — PERFECT ON PHONE AND DESKTOP */}
         <div style={{
