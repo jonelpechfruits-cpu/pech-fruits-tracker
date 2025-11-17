@@ -84,15 +84,15 @@ function App() {
     setDocsLoading(false);
   };
 
-  // Renders actual checkmark and cross symbols
+  // REAL CHECKMARK & CROSS — using Unicode symbols
   const renderCell = (value, isRef, onClick) => {
     const str = String(value || '').trim().toLowerCase();
 
     if (str === 'true') {
-      return <span style={{fontSize:'1.8rem', color:'#16a34a', fontWeight:'bold'}}>Checkmark</span>;
+      return <span style={{fontSize:'1.8rem', color:'#16a34a'}}>Checkmark</span>;
     }
     if (str === 'false') {
-      return <span style={{fontSize:'1.8rem', color:'#dc2626', fontWeight:'bold'}}>Cross</span>;
+      return <span style={{fontSize:'1.8rem', color:'#dc2626'}}>Cross</span>;
     }
 
     if (isRef) {
@@ -190,7 +190,6 @@ function App() {
           </div>
         </div>
 
-        {/* DOCUMENTS MODAL */}
         {selectedShipment && (
           <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:'1rem'}}>
             <div style={{background:'white', borderRadius:'1.5rem', width:'90%', maxWidth:'500px', maxHeight:'90vh', overflow:'auto', boxShadow:'0 25px 60px rgba(0,0,0,0.4)'}}>
