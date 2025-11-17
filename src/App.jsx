@@ -11,7 +11,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [emailMap, setEmailMap] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedShipment, setSelectedShipment] = useState(null); // for documents modal
+  const [selectedShipment, setSelectedShipment] = useState(null);
 
   useEffect(() => {
     const s = document.createElement('script');
@@ -44,7 +44,7 @@ function App() {
   useEffect(() => {
     if (!searchTerm) setFilteredShipments(shipments);
     else setFilteredShipments(shipments.filter(r =>
-      Object.values(r).some(v => v.toString().toLowerCase().includes(searchTerm.toLowerCase()))
+      Object.values(r).some(v => v?.toString().toLowerCase().includes(searchTerm.toLowerCase()))
     ));
   }, [searchTerm, shipments]);
 
@@ -119,15 +119,29 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                {filteredShipments.slice(0, 100).map((row, i) => (
-                  <tr key={i} onClick={() => setSelectedShipment(row)} style={{cursor:'pointer', background:i%2===0?'#fdfdfd':'#ffffff', borderTop:'1px solid #f1f5f9'}} onMouseEnter={e=>e.target.style.background='#f0f9ff'} onMouseLeave={e=>e.target.style.background=i%2===0?'#fdfdfd':'#ffffff'}>
-                    {Object.values(row).map((cell, j) => (
-                      <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'150px'}}>
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+                {filteredShipments.map((row, i) => {
+                  const refValue = row.REF || row.CONTAINER || 'Unknown';
+                  const refIndex = Object.keys(row).find(key => row[key] === refValue);
+
+                  return (
+                    <tr key={i} style={{background:i%2===0?'#fdfdfd':'#ffffff', borderTop:'1px solid #f1f5f9'}}>
+                      {Object.entries(row).map(([key, cell], j) => (
+                        <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>
+                          {key === refIndex ? (
+                            <span
+                              onClick={(e) => { e.stopPropagation(); setSelectedShipment(row); }}
+                              style={{color:'#ea580c', fontWeight:'bold', textDecoration:'underline', cursor:'pointer'}}
+                            >
+                              {cell}
+                            </span>
+                          ) : (
+                            cell
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -135,33 +149,27 @@ function App() {
 
         {/* DOCUMENTS MODAL */}
         {selectedShipment && (
-          <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:'1rem'}}>
+          <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:'1rem'}}>
             <div style={{background:'white', borderRadius:'1.5rem', width:'90%', maxWidth:'500px', maxHeight:'90vh', overflow:'auto', boxShadow:'0 25px 60px rgba(0,0,0,0.4)'}}>
               <div style={{padding:'1.5rem', borderBottom:'1px solid #e5e7eb', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                 <h3 style={{fontSize:'1.5rem', fontWeight:'bold', color:'#1e293b'}}>
-                  {selectedShipment.REF || selectedShipment.CONTAINER}
+                  Documents – {selectedShipment.REF || selectedShipment.CONTAINER}
                 </h3>
-                <button onClick={() => setSelectedShipment(null)} style={{fontSize:'2rem', padding:'0.5rem', color:'#6b7280', border:'none', background:'transparent', cursor:'pointer'}}>×</button>
+                <button onClick={() => setSelectedShipment(null)} style={{fontSize:'2rem', color:'#6b7280', border:'none', background:'none', cursor:'pointer'}}>×</button>
               </div>
               <div style={{padding:'1.5rem', display:'grid', gap:'1rem'}}>
+                {/* Direct link to client's own subfolder */}
                 <a 
-                  href={`/documents/${selectedShipment.REF || selectedShipment.CONTAINER}/order-confirmation.pdf`} 
+                  href={`https://drive.google.com/drive/folders/1xAfTZm40KfAFWL1nrRd-0a5IEzUelKP1?usp=sharing#folders/${selectedShipment.REF || selectedShipment.CONTAINER}`}
                   target="_blank" 
                   rel="noopener noreferrer"
-                  style={{padding:'1.2rem', background:'#f0fdf4', border:'2px solid #86efac', borderRadius:'1rem', textAlign:'center', color:'#166534', fontWeight:'bold', textDecoration:'none', fontSize:'1.1rem'}}
+                  style={{padding:'1.4rem', background:'#f0f9ff', border:'2px solid #0ea5e9', borderRadius:'1rem', textAlign:'center', color:'#0c4a6e', fontWeight:'bold', textDecoration:'none', fontSize:'1.1rem'}}
                 >
-                  Order Confirmation (PDF)
+                  Open All Documents (Order Conf + Export Docs)
                 </a>
-                
-                {/* YOUR GOOGLE DRIVE LINK */}
-                <a 
-                  href={`https://drive.google.com/drive/folders/1xAfTZm40KfAFWL1nrRd-0a5IEzUelKP1?usp=sharing/${selectedShipment.REF || selectedShipment.CONTAINER}`}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  style={{padding:'1.2rem', background:'#fefce8', border:'2px solid #facc15', borderRadius:'1rem', textAlign:'center', color:'#92400e', fontWeight:'bold', textDecoration:'none', fontSize:'1.1rem'}}
-                >
-                  Export Documents Folder (Google Drive)
-                </a>
+              </div>
+              <div style={{padding:'0 1.5rem 1.5rem', fontSize:'0.9rem', color:'#6b7280', textAlign:'center'}}>
+                All your documents are in one private folder – updated in real time
               </div>
             </div>
           </div>
