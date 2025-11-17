@@ -12,16 +12,13 @@ function App() {
   const [emailMap, setEmailMap] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Load email → consignee map
   useEffect(() => {
     const s = document.createElement('script');
-    s.src = '/data/email-consignee-map.js';
-    s.async = true;
+    s.src = '/data/email-consignee-map.js'; s.async = true;
     s.onload = () => window.EMAIL_CONSIGNEE_MAP && setEmailMap(window.EMAIL_CONSIGNEE_MAP);
     document.body.appendChild(s);
   }, []);
 
-  // Load & filter shipments
   useEffect(() => {
     if (user && Object.keys(emailMap).length) {
       setLoading(true);
@@ -41,15 +38,11 @@ function App() {
     }
   }, [user, emailMap]);
 
-  // Live search
   useEffect(() => {
-    if (!searchTerm) {
-      setFilteredShipments(shipments);
-    } else {
-      setFilteredShipments(shipments.filter(r =>
-        Object.values(r).some(v => v.toString().toLowerCase().includes(searchTerm.toLowerCase()))
-      ));
-    }
+    if (!searchTerm) setFilteredShipments(shipments);
+    else setFilteredShipments(shipments.filter(r =>
+      Object.values(r).some(v => v.toString().toLowerCase().includes(searchTerm.toLowerCase()))
+    ));
   }, [searchTerm, shipments]);
 
   const handleLogin = e => {
@@ -59,7 +52,6 @@ function App() {
       .catch(err => alert(err.message));
   };
 
-  // LOGIN SCREEN
   if (!user) return (
     <div style={{minHeight:'100vh', background:'linear-gradient(135deg,#f97316,#22c55e)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem'}}>
       <div style={{background:'white', padding:'3rem', borderRadius:'1.5rem', boxShadow:'0 25px 50px rgba(0,0,0,0.3)', width:'420px', maxWidth:'100%', textAlign:'center'}}>
@@ -85,9 +77,8 @@ function App() {
 
   return (
     <div style={{minHeight:'100vh', background:'#f8fafc', fontFamily:'system-ui,sans-serif'}}>
-      {/* PROFESSIONAL TOP BAR */}
       <header style={{background:'white', boxShadow:'0 4px 20px rgba(0,0,0,0.1)', position:'sticky', top:0, zIndex:50}}>
-        <div style={{maxWidth:'1600px', margin:'0 auto', padding:'1.2rem 2rem', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+        <div style={{maxWidth:'1800px', margin:'0 auto', padding:'1.2rem 2rem', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
           <div style={{display:'flex', alignItems:'center', gap:'4rem'}}>
             <div style={{display:'flex', alignItems:'center', gap:'1rem'}}>
               <div style={{width:'48px', height:'48px', background:'linear-gradient(to right,#f97316,#22c55e)', borderRadius:'12px'}}></div>
@@ -112,73 +103,78 @@ function App() {
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
       <main style={{maxWidth:'1800px', margin:'3rem auto', padding:'0 2rem'}}>
         <div style={{marginBottom:'2rem', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
           <h2 style={{fontSize:'2.2rem', fontWeight:'bold', color:'#1e293b'}}>Live Shipments ({total})</h2>
         </div>
 
-        <input
-          type="text"
-          placeholder="Search by container, vessel, reference, product, port..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          style={{width:'100%', padding:'1.2rem 1.5rem', marginBottom:'2rem', border:'1px solid #cbd5e1', borderRadius:'1rem', fontSize:'1.1rem', boxShadow:'0 4px 10px rgba(0,0,0,0.05)'}}
-        />
+        {/* SEARCH BAR — SAME WIDTH AS TABLE */}
+        <div style={{marginBottom:'2rem'}}>
+          <input
+            type="text"
+            placeholder="Search by container, vessel, reference, product, port..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{width:'100%', padding:'1.2rem 1.5rem', border:'1px solid #cbd5e1', borderRadius:'1rem', fontSize:'1.1rem', boxShadow:'0 4px 10px rgba(0,0,0,0.05)'}}
+          />
+        </div>
 
-        {/* ULTRA-WIDE PERFECT TABLE — ALL COLUMNS VISIBLE */}
+        {/* TABLE WITH SCROLLBAR AT TOP + SAME WIDTH */}
         {loading ? <p style={{textAlign:'center', padding:'6rem', fontSize:'1.3rem', color:'#64748b'}}>Loading shipments...</p> : (
           <div style={{background:'white', borderRadius:'1.2rem', boxShadow:'0 15px 35px rgba(0,0,0,0.1)', overflow:'hidden'}}>
-            <div style={{overflowX:'auto'}}>
-              <table style={{width:'100%', borderCollapse:'collapse', tableLayout:'fixed'}}>
-                <thead style={{background:'#f8fafc', position:'sticky', top:0, zIndex:10}}>
-                  <tr>
-                    {Object.keys(filteredShipments[0] || {}).map(h => {
-                      const widths = {
-                        'NR': '70px', 'VESSEL': '200px', 'CONTAINER': '160px', 'REF': '120px',
-                        'INV': '120px', 'STATUS': '140px', 'CONSIGNEE': '220px', 'PRODUCTS': '240px',
-                        'POL': '130px', 'POD': '130px', 'ETD': '130px', 'LIVE ETA': '130px', 'DOCS': '90px'
-                      };
-                      return (
-                        <th key={h} style={{
-                          padding:'1.3rem 1rem',
-                          textAlign:'left',
-                          fontWeight:'bold',
-                          color:'#1e293b',
-                          fontSize:'0.95rem',
-                          whiteSpace:'nowrap',
-                          width: widths[h] || '140px',
-                          borderBottom:'3px solid #e2e8f0'
-                        }}>
-                          {h}
-                        </th>
-                      );
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredShipments.length === 0 ? (
-                    <tr><td colSpan="20" style={{textAlign:'center', padding:'6rem', color:'#94a3b8', fontSize:'1.2rem'}}>No shipments found</td></tr>
-                  ) : (
-                    filteredShipments.map((row, i) => (
-                      <tr key={i} style={{background: i % 2 === 0 ? '#ffffff' : '#fdfdfd', borderBottom:'1px solid #f1f5f9'}}>
-                        {Object.values(row).map((cell, j) => (
-                          <td key={j} style={{
-                            padding:'1.1rem 1rem',
+            {/* SCROLLBAR AT THE TOP */}
+            <div style={{overflowX:'auto', direction:'rtl'}}>
+              <div style={{direction:'ltr'}}>
+                <table style={{width:'100%', borderCollapse:'collapse', tableLayout:'fixed', minWidth:'2000px'}}>
+                  <thead style={{background:'#f8fafc', position:'sticky', top:0, zIndex:20}}>
+                    <tr>
+                      {Object.keys(filteredShipments[0] || {}).map(h => {
+                        const widths = {
+                          'NR': '70px', 'VESSEL': '200px', 'CONTAINER': '160px', 'REF': '120px',
+                          'INV': '120px', 'STATUS': '140px', 'CONSIGNEE': '220px', 'PRODUCTS': '240px',
+                          'POL': '130px', 'POD': '130px', 'ETD': '130px', 'LIVE ETA': '130px', 'DOCS': '90px'
+                        };
+                        return (
+                          <th key={h} style={{
+                            padding:'1.3rem 1rem',
+                            textAlign:'left',
+                            fontWeight:'bold',
+                            color:'#1e293b',
+                            fontSize:'0.95rem',
                             whiteSpace:'nowrap',
-                            overflow:'hidden',
-                            textOverflow:'ellipsis',
-                            color:'#334155',
-                            fontSize:'0.98rem'
+                            width: widths[h] || '140px',
+                            borderBottom:'3px solid #e2e8f0'
                           }}>
-                            {cell}
-                          </td>
-                        ))}
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                            {h}
+                          </th>
+                        );
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredShipments.length === 0 ? (
+                      <tr><td colSpan="20" style={{textAlign:'center', padding:'6rem', color:'#94a3b8', fontSize:'1.2rem'}}>No shipments found</td></tr>
+                    ) : (
+                      filteredShipments.map((row, i) => (
+                        <tr key={i} style={{background: i % 2 === 0 ? '#ffffff' : '#fdfdfd', borderBottom:'1px solid #f1f5f9'}}>
+                          {Object.values(row).map((cell, j) => (
+                            <td key={j} style={{
+                              padding:'1.1rem 1rem',
+                              whiteSpace:'nowrap',
+                              overflow:'hidden',
+                              textOverflow:'ellipsis',
+                              color:'#334155',
+                              fontSize:'0.98rem'
+                            }}>
+                              {cell}
+                            </td>
+                          ))}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
