@@ -35,6 +35,25 @@ function App() {
               (r.CONSIGNEE || '').trim().toUpperCase() === consignee.trim().toUpperCase()
             );
           }
+
+          // SORTING BY STATUS CATEGORY
+          filtered.sort((a, b) => {
+            const statusA = (a.STATUS || '').toUpperCase();
+            const statusB = (b.STATUS || '').toUpperCase();
+
+            const priority = {
+              'PORT': 1,
+              'STACK': 2,
+              'PLANNED': 3,
+              'EN ROUTE': 4
+            };
+
+            const priA = priority[statusA] || 5; // OFFLOADED = 5
+            const priB = priority[statusB] || 5;
+
+            return priA - priB;
+          });
+
           setShipments(filtered);
           setFilteredShipments(filtered);
         });
@@ -79,28 +98,25 @@ function App() {
     setDocsLoading(false);
   };
 
-  // LOGIN SCREEN
-  if (!user) {
-    return (
-      <div style={{minHeight:'100vh', background:'linear-gradient(135deg,#f97316,#22c55e)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem'}}>
-        <div style={{background:'white', padding:'3rem', borderRadius:'1.5rem', boxShadow:'0 25px 50px rgba(0,0,0,0.3)', width:'420px', maxWidth:'95%', textAlign:'center'}}>
-          <img src="/logo.jpg" alt="Pech Fruits" style={{width:'160px', height:'auto', margin:'0 auto 1.5rem', display:'block'}} />
-          <h1 style={{fontSize:'2.2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'0.5rem'}}>Pech Fruits Tracker</h1>
-          <p style={{color:'#64748b', marginBottom:'2rem'}}>Sign in to view your live shipments</p>
-          <form onSubmit={handleLogin} style={{display:'grid', gap:'1rem'}}>
-            <input type="email" placeholder="Email" required value={email} onChange={e=>setEmail(e.target.value)}
-              style={{padding:'1rem 1.2rem', border:'1px solid #cbd5e1', borderRadius:'0.8rem', fontSize:'1.1rem'}} />
-            <input type="password" placeholder="Password" required value={password} onChange={e=>setPassword(e.target.value)}
-              style={{padding:'1rem 1.2rem', border:'1px solid #cbd5e1', borderRadius:'0.8rem', fontSize:'1.1rem'}} />
-            <button type="submit"
-              style={{padding:'1rem', background:'linear-gradient(to right,#ea580c,#16a34a)', color:'white', fontWeight:'bold', border:'none', borderRadius:'0.8rem', fontSize:'1.1rem', cursor:'pointer'}}>
-              Sign In
-            </button>
-          </form>
-        </div>
+  if (!user) return (
+    <div style={{minHeight:'100vh', background:'linear-gradient(135deg,#f97316,#22c55e)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem'}}>
+      <div style={{background:'white', padding:'3rem', borderRadius:'1.5rem', boxShadow:'0 25px 50px rgba(0,0,0,0.3)', width:'420px', maxWidth:'95%', textAlign:'center'}}>
+        <img src="/logo.jpg" alt="Pech Fruits" style={{width:'160px', height:'auto', margin:'0 auto 1.5rem', display:'block'}} />
+        <h1 style={{fontSize:'2.2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'0.5rem'}}>Pech Fruits Tracker</h1>
+        <p style={{color:'#64748b', marginBottom:'2rem'}}>Sign in to view your live shipments</p>
+        <form onSubmit={handleLogin} style={{display:'grid', gap:'1rem'}}>
+          <input type="email" placeholder="Email" required value={email} onChange={e=>setEmail(e.target.value)}
+            style={{padding:'1rem 1.2rem', border:'1px solid #cbd5e1', borderRadius:'0.8rem', fontSize:'1.1rem'}} />
+          <input type="password" placeholder="Password" required value={password} onChange={e=>setPassword(e.target.value)}
+            style={{padding:'1rem 1.2rem', border:'1px solid #cbd5e1', borderRadius:'0.8rem', fontSize:'1.1rem'}} />
+          <button type="submit"
+            style={{padding:'1rem', background:'linear-gradient(to right,#ea580c,#16a34a)', color:'white', fontWeight:'bold', border:'none', borderRadius:'0.8rem', fontSize:'1.1rem', cursor:'pointer'}}>
+            Sign In
+          </button>
+        </form>
       </div>
-    );
-  }
+    </div>
+  );
 
   const currentConsignee = user ? emailMap[user.email.toLowerCase()] || user.email : '';
   const total = filteredShipments.length;
@@ -175,6 +191,7 @@ function App() {
                     <div><strong>ETA:</strong> {shipment['LIVE ETA'] || shipment.ETD || '-'}</div>
                   </div>
                 </div>
+:);
               );
             })}
           </div>
