@@ -48,7 +48,7 @@ function App() {
               'EN ROUTE': 4
             };
 
-            const priA = priority[statusA] || 5; // OFFLOADED = 5
+            const priA = priority[statusA] || 5;
             const priB = priority[statusB] || 5;
 
             return priA - priB;
@@ -134,19 +134,17 @@ function App() {
 
   return (
     <div style={{minHeight:'100vh', background:'#f8fafc', fontFamily:'system-ui,sans-serif'}}>
-      {/* HEADER */}
+      {/* PERFECT PHONE HEADER — NO SQUEEZING */}
       <header style={{background:'white', boxShadow:'0 4px 20px rgba(0,0,0,0.1)', position:'sticky', top:0, zIndex:50}}>
-        <div style={{padding:'1rem', position:'relative', minHeight:'80px', display:'flex', alignItems:'center', justifyContent:'center'}}>
-          <div style={{textAlign:'center', position:'absolute', left:'50%', top:'50%', transform:'translate(-50%, -50%)'}}>
-            <img src="/logo.jpg" alt="Pech Fruits" style={{height:'56px', width:'auto', display:'block', margin:'0 auto 0.4rem'}} />
+        <div style={{padding:'1rem', display:'flex', flexDirection:'column', alignItems:'center', gap:'0.5rem'}}>
+          <div style={{display:'flex', alignItems:'center', gap:'1rem'}}>
+            <img src="/logo.jpg" alt="Pech Fruits" style={{height:'48px', width:'auto'}} />
             <h1 style={{fontSize:'1.6rem', fontWeight:'bold', color:'#1e293b', margin:0}}>Pech Fruits Tracker</h1>
           </div>
-          <div style={{position:'absolute', left:'1rem', top:'50%', transform:'translateY(-50%)', fontSize:'0.95rem', color:'#475569'}}>
-            Logged in as <strong style={{color:'#1e293b'}}>{currentConsignee}</strong>
-          </div>
-          <div style={{position:'absolute', right:'1rem', top:'50%', transform:'translateY(-50%)'}}>
+          <div style={{display:'flex', justifyContent:'space-between', width:'100%', maxWidth:'800px', fontSize:'0.9rem', color:'#475569'}}>
+            <div>Logged in as <strong style={{color:'#1e293b'}}>{currentConsignee}</strong></div>
             <button onClick={()=>auth.signOut().then(()=>setUser(null))}
-              style={{background:'#dc2626', color:'white', padding:'0.65rem 1.3rem', borderRadius:'0.6rem', border:'none', fontWeight:'bold', fontSize:'0.95rem'}}>
+              style={{background:'#dc2626', color:'white', padding:'0.5rem 1.2rem', borderRadius:'0.6rem', border:'none', fontWeight:'bold'}}>
               Logout
             </button>
           </div>
@@ -198,7 +196,7 @@ function App() {
                     <div><strong>REF:</strong> {shipment.REF || shipment.CONTAINER || '-'}</div>
                     <div><strong>INV:</strong> {shipment.INV || '-'}</div>
                     <div><strong>Customer:</strong> {shipment.CONSIGNEE || '-'}</div>
-                    <div><strong>Commodity:</strong> {shipment.PRODUCTS || '-'}</div>
+                    <div><strong>Commodity:</strong> {shipment. PRODUCTS || '-'}</div>
                     <div><strong>ETA:</strong> {shipment['LIVE ETA'] || shipment.ETD || '-'}</div>
                   </div>
                 </div>
