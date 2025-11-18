@@ -88,17 +88,6 @@ function App() {
     setDocsLoading(false);
   };
 
-  // Get status color
-  const getStatusColor = (status) => {
-    const s = (status || '').toUpperCase();
-    if (s.includes('PORT')) return {bg: '#fee2e2', text: '#991b1b'};     // Red
-    if (s.includes('EN ROUTE')) return {bg: '#fef9c3', text: '#854d0e'}; // Light Yellow
-    if (s.includes('FEEDBACK')) return {bg: '#fed7aa', text: '#9c4221'}; // Light Orange
-    if (s.includes('PLANNED')) return {bg: '#e5e7eb', text: '#4b5563'};  // Light Grey
-    if (s.includes('OFFLOAD')) return {bg: '#f0fdf4', text: '#166534'};  // Green
-    return {bg: '#f3f4f6', text: '#6b7280'}; // Default
-  };
-
   if (!user) return (
     <div style={{minHeight:'100vh', background:'linear-gradient(135deg,#f97316,#22c55e)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem'}}>
       <div style={{background:'white', padding:'3rem', borderRadius:'1.5rem', boxShadow:'0 25px 50px rgba(0,0,0,0.3)', width:'420px', maxWidth:'95%', textAlign:'center'}}>
@@ -124,19 +113,20 @@ function App() {
 
   return (
     <div style={{minHeight:'100vh', background:'#f8fafc', fontFamily:'system-ui,sans-serif'}}>
-      {/* HEADER */}
+      {/* PERFECT MOBILE HEADER — LOGO CENTERED, NO SQUEEZING */}
       <header style={{background:'white', boxShadow:'0 4px 20px rgba(0,0,0,0.1)', position:'sticky', top:0, zIndex:50}}>
-        <div style={{padding:'1rem', position:'relative', minHeight:'80px', display:'flex', alignItems:'center', justifyContent:'center'}}>
-          <div style={{textAlign:'center', position:'absolute', left:'50%', top:'50%', transform:'translate(-50%, -50%)'}}>
-            <img src="/logo.jpg" alt="Pech Fruits" style={{height:'56px', width:'auto', display:'block', margin:'0 auto 0.4rem'}} />
-            <h1 style={{fontSize:'1.6rem', fontWeight:'bold', color:'#1e293b', margin:0}}>Pech Fruits Tracker</h1>
+        <div style={{padding:'1rem 0.8rem', display:'flex', flexDirection:'column', alignItems:'center', gap:'0.5rem'}}>
+          {/* Logo + Title — always centered */}
+          <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+            <img src="/logo.jpg" alt="Pech Fruits" style={{height:'48px', width:'auto'}} />
+            <h1 style={{fontSize:'1.5rem', fontWeight:'bold', color:'#1e293b', margin:'0.4rem 0 0'}}>Pech Fruits Tracker</h1>
           </div>
-          <div style={{position:'absolute', left:'1rem', top:'50%', transform:'translateY(-50%)', fontSize:'0.95rem', color:'#475569'}}>
-            Logged in as <strong style={{color:'#1e293b'}}>{currentConsignee}</strong>
-          </div>
-          <div style={{position:'absolute', right:'1rem', top:'50%', transform:'translateY(-50%)'}}>
+
+          {/* Logged in as + Logout — horizontal on desktop, wraps on phone */}
+          <div style={{display:'flex', justifyContent:'space-between', width:'100%', maxWidth:'800px', fontSize:'0.9rem', color:'#475569', flexWrap:'wrap', gap:'1rem'}}>
+            <div>Logged in as <strong style={{color:'#1e293b'}}>{currentConsignee}</strong></div>
             <button onClick={()=>auth.signOut().then(()=>setUser(null))}
-              style={{background:'#dc2626', color:'white', padding:'0.65rem 1.3rem', borderRadius:'0.6rem', border:'none', fontWeight:'bold', fontSize:'0.95rem'}}>
+              style={{background:'#dc2626', color:'white', padding:'0.5rem 1.2rem', borderRadius:'0.6rem', border:'none', fontWeight:'bold'}}>
               Logout
             </button>
           </div>
@@ -173,14 +163,13 @@ function App() {
         {activeTab === 'dashboard' && (
           <div style={{display:'grid', gap:'1.2rem'}}>
             {filteredShipments.map((shipment, i) => {
-              const status = (shipment.STATUS || '').toUpperCase();
-              const color = getStatusColor(status);
+              const statusColor = shipment.STATUS?.includes('Delayed') ? '#dc2626' : '#16a34a';
 
               return (
                 <div key={i} onClick={() => openDocuments(shipment)} style={{background:'white', borderRadius:'1.2rem', boxShadow:'0 8px 25px rgba(0,0,0,0.1)', padding:'1.5rem', cursor:'pointer'}}>
                   <div style={{display:'flex', justifyContent:'space-between', alignItems:'start', marginBottom:'0.8rem'}}>
                     <h3 style={{fontSize:'1.4rem', fontWeight:'bold', color:'#1e293b'}}>{shipment.VESSEL || 'No Vessel'}</h3>
-                    <span style={{background:color.bg, color:color.text, padding:'0.4rem 0.8rem', borderRadius:'0.5rem', fontSize:'0.8rem', fontWeight:'bold'}}>
+                    <span style={{background:statusColor, color:'white', padding:'0.4rem 0.8rem', borderRadius:'0.5rem', fontSize:'0.8rem', fontWeight:'bold'}}>
                       {shipment.STATUS || 'Unknown'}
                     </span>
                   </div>
