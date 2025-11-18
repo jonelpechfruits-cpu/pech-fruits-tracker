@@ -14,7 +14,6 @@ function App() {
   const [selectedShipment, setSelectedShipment] = useState(null);
   const [docs, setDocs] = useState([]);
   const [docsLoading, setDocsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard or shipments
 
   useEffect(() => {
     const s = document.createElement('script');
@@ -35,6 +34,27 @@ function App() {
               (r.CONSIGNEE || '').trim().toUpperCase() === consignee.trim().toUpperCase()
             );
           }
+
+          // SORT: Upcoming first → Offloaded last
+          filtered.sort((a, b) => {
+            const statusA = (a.STATUS || '').toUpperCase();
+            const statusB = (b.STATUS || '').toUpperCase();
+
+            // Priority order
+            const priority = {
+              'IN TRANSIT': 1,
+              'ARRIVED': 2,
+              'OFFLOAD': 3,
+              'OFFLOADED': 4,
+              '': 5
+            };
+
+            const priA = priority[statusA] || 5;
+            const priB = priority[statusB] || 5;
+
+            return priA - priB;
+          });
+
           setShipments(filtered);
           setFilteredShipments(filtered);
         });
@@ -104,7 +124,6 @@ function App() {
 
   return (
     <div style={{minHeight:'100vh', background:'#f8fafc', fontFamily:'system-ui,sans-serif'}}>
-      {/* HEADER */}
       <header style={{background:'white', boxShadow:'0 4px 20px rgba(0,0,0,0.1)', position:'sticky', top:0, zIndex:50}}>
         <div style={{padding:'1rem', position:'relative', minHeight:'80px', display:'flex', alignItems:'center', justifyContent:'center'}}>
           <div style={{textAlign:'center', position:'absolute', left:'50%', top:'50%', transform:'translate(-50%, -50%)'}}>
@@ -123,19 +142,7 @@ function App() {
         </div>
       </header>
 
-      {/* TAB BAR */}
-      <div style={{background:'white', borderTop:'1px solid #e2e8f0', position:'fixed', bottom:0, left:0, right:0, zIndex:50}}>
-        <div style={{display:'flex', justifyContent:'space-around', padding:'0.5rem 0'}}>
-          <button onClick={() => setActiveTab('dashboard')} style={{padding:'0.8rem', color:activeTab==='dashboard'?'#ea580c':'#64748b', fontWeight:activeTab==='dashboard'?'bold':'normal'}}>
-            Dashboard
-          </button>
-          <button onClick={() => setActiveTab('shipments')} style={{padding:'0.8rem', color:activeTab==='shipments'?'#ea580c':'#64748b', fontWeight:activeTab==='shipments'?'bold':'normal'}}>
-            Shipments
-          </button>
-        </div>
-      </div>
-
-      <div style={{padding:'1rem', paddingBottom:'5rem', width:'100vw', marginLeft:'calc(50% - 50vw)', boxSizing:'border-box'}}>
+      <div style={{padding:'1rem', width:'100vw', marginLeft:'calc(50% - 50vw)', boxSizing:' idioma:border-box'}}>
         <h2 style={{fontSize:'1.8rem', fontWeight:'bold', color:'#1e293b', marginBottom:'1rem', textAlign:'center'}}>
           Live Shipments ({total})
         </h2>
@@ -148,73 +155,41 @@ function App() {
           style={{width:'100%', padding:'1rem', marginBottom:'1.5rem', border:'1px solid #cbd5e1', borderRadius:'1rem', fontSize:'1rem', boxSizing:'border-box'}}
         />
 
-        {/* DASHBOARD TAB — PHONE-FIRST CARD VIEW */}
-        {activeTab === 'dashboard' && (
-          <div style={{display:'grid', gap:'1rem'}}>
-            {filteredShipments.map((shipment, i) => {
-              const ref = shipment.REF || shipment.CONTAINER || 'Unknown';
-              const statusColor = shipment.STATUS?.includes('Delayed') ? '#dc2626' : '#16a34a';
+        <div style={{background:'white', borderRadius:'1rem', boxShadow:'0 10px 25px rgba(0,0,0,0.1)', overflow:'hidden'}}>
+          <div style={{maxHeight:'70vh', overflow:'auto'}}>
+            <table style={{width:'100%', minWidth:'1200px', borderCollapse:'collapse'}}>
+              <thead style={{background:'#f1f5f9', position:'sticky', top:0, zIndex:10, boxShadow:'0 2px 4px rgba(0,0,0,0.05)'}}>
+                <tr>
+                  {Object.keys(filteredShipments[0] || {}).map((h, i) => (
+                    <th key={i} style={{padding:'1rem 0.6rem', textAlign:'left', fontSize:'0.85rem', fontWeight:'bold', color:'#1e293b', whiteSpace:'nowrap'}}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredShipments.map((row, i) => {
+                  const refValue = row.REF || row.CONTAINER || '';
+                  const refIndex = Object.keys(row).findIndex(k => row[k] === refValue);
 
-              return (
-                <div key={i} onClick={() => openDocuments(shipment)} style={{background:'white', borderRadius:'1rem', boxShadow:'0 8px 20px rgba(0,0,0,0.1)', padding:'1.5rem', cursor:'pointer'}}>
-                  <div style={{display:'flex', justifyContent:'space-between', alignItems:'start', marginBottom:'0.5rem'}}>
-                    <h3 style={{fontSize:'1.3rem', fontWeight:'bold', color:'#1e293b'}}>{shipment.VESSEL || 'No Vessel'}</h3>
-                    <span style={{background:statusColor, color:'white', padding:'0.4rem 0.8rem', borderRadius:'0.5rem', fontSize:'0.8rem', fontWeight:'bold'}}>
-                      {shipment.STATUS || 'Unknown'}
-                    </span>
-                  </div>
-                  <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.5rem', fontSize:'1rem', color:'#475569'}}>
-                    <div><strong>Container:</strong> {shipment.CONTAINER || '-'}</div>
-                    <div><strong>REF:</strong> {ref}</div>
-                    <div><strong>INV:</strong> {shipment.INV || '-'}</div>
-                    <div><strong>Customer:</strong> {shipment.CONSIGNEE || '-'}</div>
-                    <div><strong>Commodity:</strong> {shipment.PRODUCTS || '-'}</div>
-                    <div><strong>ETA:</strong> {shipment['LIVE ETA'] || shipment.ETD || '-'}</div>
-                  </div>
-                </div>
-              );
-            })}
+                  return (
+                    <tr key={i} style={{background:i%2===0?'#fdfdfd':'#ffffff', borderTop:'1px solid #f1f5f9'}}>
+                      {Object.entries(row).map(([key, cell], j) => (
+                        <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>
+                          {j === refIndex ? (
+                            <span onClick={() => openDocuments(row)} style={{color:'#ea580c', fontWeight:'bold', textDecoration:'underline', cursor:'pointer'}}>
+                              {cell}
+                            </span>
+                          ) : cell}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        )}
-
-        {/* SHIPMENTS TAB — CLASSIC TABLE */}
-        {activeTab === 'shipments' && (
-          <div style={{background:'white', borderRadius:'1rem', boxShadow:'0 10px 25px rgba(0,0,0,0.1)', overflow:'hidden'}}>
-            <div style={{overflowX:'auto'}}>
-              <table style={{width:'100%', minWidth:'1200px', borderCollapse:'collapse'}}>
-                <thead style={{background:'#f1f5f9', position:'sticky', top:0}}>
-                  <tr>
-                    {Object.keys(filteredShipments[0] || {}).map((h, i) => (
-                      <th key={i} style={{padding:'1rem 0.6rem', textAlign:'left', fontSize:'0.85rem', fontWeight:'bold', color:'#1e293b'}}>
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredShipments.map((row, i) => {
-                    const refValue = row.REF || row.CONTAINER || '';
-                    const refIndex = Object.keys(row).findIndex(k => row[k] === refValue);
-
-                    return (
-                      <tr key={i} style={{background:i%2===0?'#fdfdfd':'#ffffff', borderTop:'1px solid #f1f5f9'}}>
-                        {Object.entries(row).map(([key, cell], j) => (
-                          <td key={j} style={{padding:'0.9rem 0.6rem', fontSize:'0.9rem', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>
-                            {j === refIndex ? (
-                              <span onClick={() => openDocuments(row)} style={{color:'#ea580c', fontWeight:'bold', textDecoration:'underline', cursor:'pointer'}}>
-                                {cell}
-                              </span>
-                            ) : cell}
-                          </td>
-                        ))}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        </div>
 
         {/* DOCUMENTS MODAL */}
         {selectedShipment && (
