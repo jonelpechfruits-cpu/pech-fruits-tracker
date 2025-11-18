@@ -35,14 +35,6 @@ function App() {
               (r.CONSIGNEE || '').trim().toUpperCase() === consignee.trim().toUpperCase()
             );
           }
-
-          // SORT BY ETA: FUTURE FIRST → PAST LAST
-          filtered.sort((a, b) => {
-            const dateA = new Date(a['LIVE ETA'] || a.ETD || '2099-12-31');
-            const dateB = new Date(b['LIVE ETA'] || b.ETD || '2099-12-31');
-            return dateA - dateB;
-          });
-
           setShipments(filtered);
           setFilteredShipments(filtered);
         });
@@ -87,25 +79,28 @@ function App() {
     setDocsLoading(false);
   };
 
-  if (!user) return (
-    <div style={{minHeight:'100vh', background:'linear-gradient(135deg,#f97316,#22c55e)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem'}}>
-      <div style={{background:'white', padding:'3rem', borderRadius:'1.5rem', boxShadow:'0 25px 50px rgba(0,0,0,0.3)', width:'420px', maxWidth:'95%', textAlign:'center'}}>
-        <img src="/logo.jpg" alt="Pech Fruits" style={{width:'160px', height:'auto', margin:'0 auto 1.5rem', display:'block'}} />
-        <h1 style={{fontSize:'2.2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'0.5rem'}}>Pech Fruits Tracker</h1>
-        <p style={{color:'#64748b', marginBottom:'2rem'}}>Sign in to view your live shipments</p>
-        <form onSubmit={handleLogin} style={{display:'grid', gap:'1rem'}}>
-          <input type="email" placeholder="Email" required value={email} onChange={e=>setEmail(e.target.value)}
-            style={{padding:'1rem 1.2rem', border:'1px solid #cbd5e1', borderRadius:'0.8rem', fontSize:'1.1rem'}} />
-          <input type="password" placeholder="Password" required value={password} onChange={e=>setPassword(e.target.value)}
-            style={{padding:'1rem 1.2rem', border:'1px solid #cbd5e1', borderRadius:'0.8rem', fontSize:'1.1rem'}} />
-          <button type="submit"
-            style={{padding:'1rem', background:'linear-gradient(to right,#ea580c,#16a34a)', color:'white', fontWeight:'bold', border:'none', borderRadius:'0.8rem', fontSize:'1.1rem', cursor:'pointer'}}>
-            Sign In
-          </button>
-        </form>
+  // LOGIN SCREEN
+  if (!user) {
+    return (
+      <div style={{minHeight:'100vh', background:'linear-gradient(135deg,#f97316,#22c55e)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem'}}>
+        <div style={{background:'white', padding:'3rem', borderRadius:'1.5rem', boxShadow:'0 25px 50px rgba(0,0,0,0.3)', width:'420px', maxWidth:'95%', textAlign:'center'}}>
+          <img src="/logo.jpg" alt="Pech Fruits" style={{width:'160px', height:'auto', margin:'0 auto 1.5rem', display:'block'}} />
+          <h1 style={{fontSize:'2.2rem', fontWeight:'bold', color:'#1e293b', marginBottom:'0.5rem'}}>Pech Fruits Tracker</h1>
+          <p style={{color:'#64748b', marginBottom:'2rem'}}>Sign in to view your live shipments</p>
+          <form onSubmit={handleLogin} style={{display:'grid', gap:'1rem'}}>
+            <input type="email" placeholder="Email" required value={email} onChange={e=>setEmail(e.target.value)}
+              style={{padding:'1rem 1.2rem', border:'1px solid #cbd5e1', borderRadius:'0.8rem', fontSize:'1.1rem'}} />
+            <input type="password" placeholder="Password" required value={password} onChange={e=>setPassword(e.target.value)}
+              style={{padding:'1rem 1.2rem', border:'1px solid #cbd5e1', borderRadius:'0.8rem', fontSize:'1.1rem'}} />
+            <button type="submit"
+              style={{padding:'1rem', background:'linear-gradient(to right,#ea580c,#16a34a)', color:'white', fontWeight:'bold', border:'none', borderRadius:'0.8rem', fontSize:'1.1rem', cursor:'pointer'}}>
+              Sign In
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   const currentConsignee = user ? emailMap[user.email.toLowerCase()] || user.email : '';
   const total = filteredShipments.length;
@@ -144,7 +139,7 @@ function App() {
       </nav>
 
       {/* MAIN CONTENT */}
-      <div style={{padding:'1rem', paddingBottom:'5rem', width:'95vw', margin:'3rem auto 0', maxWidth:'1400px'}}>
+      <div style={{padding:'1rem', paddingBottom:'5rem', width:'100vw', marginLeft:'calc(50% - 50vw)', boxSizing:'border-box'}}>
         <h2 style={{fontSize:'1.8rem', fontWeight:'bold', color:'#1e293b', marginBottom:'1rem', textAlign:'center'}}>
           Live Shipments ({total})
         </h2>
@@ -173,7 +168,7 @@ function App() {
                   </div>
                   <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.6rem', fontSize:'1rem', color:'#475569'}}>
                     <div><strong>Container:</strong> {shipment.CONTAINER || '-'}</div>
-                    <div><strong>REF:</strong> {shipment.REF || shipment.CONT/fwlink || '-'}</div>
+                    <div><strong>REF:</strong> {shipment.REF || shipment.CONTAINER || '-'}</div>
                     <div><strong>INV:</strong> {shipment.INV || '-'}</div>
                     <div><strong>Customer:</strong> {shipment.CONSIGNEE || '-'}</div>
                     <div><strong>Commodity:</strong> {shipment.PRODUCTS || '-'}</div>
