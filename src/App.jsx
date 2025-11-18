@@ -14,13 +14,7 @@ function App() {
   const [selectedShipment, setSelectedShipment] = useState(null);
   const [docs, setDocs] = useState([]);
   const [docsLoading, setDocsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard or shipments
-
-  useEffect(() => {
-    document.title = "Pech Fruits Tracker";
-    const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-    link.rel = 'icon'; link.href = '/favicon.ico'; document.head.appendChild(link);
-  }, []);
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   useEffect(() => {
     const s = document.createElement('script');
@@ -41,13 +35,14 @@ function App() {
               (r.CONSIGNEE || '').trim().toUpperCase() === consignee.trim().toUpperCase()
             );
           }
-          // Sort: upcoming first
+
+          // SORT BY ETA: FUTURE FIRST → PAST LAST
           filtered.sort((a, b) => {
-            const statusOrder = { 'IN TRANSIT': 1, 'ARRIVED': 2, 'OFFLOAD': 3, 'OFFLOADED': 4 };
-            const aStatus = statusOrder[a.STATUS?.toUpperCase()] || 99;
-            const bStatus = statusOrder[b.STATUS?.toUpperCase()] || 99;
-            return aStatus - bStatus;
+            const dateA = new Date(a['LIVE ETA'] || a.ETD || '2099-12-31');
+            const dateB = new Date(b['LIVE ETA'] || b.ETD || '2099-12-31');
+            return dateA - dateB;
           });
+
           setShipments(filtered);
           setFilteredShipments(filtered);
         });
@@ -136,7 +131,7 @@ function App() {
         </div>
       </header>
 
-      {/* BOTTOM NAV — PERFECT FOR PHONE */}
+      {/* BOTTOM NAV */}
       <nav style={{position:'fixed', bottom:0, left:0, right:0, background:'white', borderTop:'1px solid #e2e8f0', zIndex:50}}>
         <div style={{display:'flex', justifyContent:'space-around', padding:'0.8rem 0'}}>
           <button onClick={()=>setActiveTab('dashboard')} style={{color:activeTab==='dashboard'?'#ea580c':'#64748b', fontWeight:activeTab==='dashboard'?'bold':'normal', fontSize:'1rem'}}>
@@ -149,7 +144,7 @@ function App() {
       </nav>
 
       {/* MAIN CONTENT */}
-      <div style={{padding:'1rem', paddingBottom:'5rem', width:'100vw', marginLeft:'calc(50% - 50vw)', boxSizing:'border-box'}}>
+      <div style={{padding:'1rem', paddingBottom:'5rem', width:'95vw', margin:'3rem auto 0', maxWidth:'1400px'}}>
         <h2 style={{fontSize:'1.8rem', fontWeight:'bold', color:'#1e293b', marginBottom:'1rem', textAlign:'center'}}>
           Live Shipments ({total})
         </h2>
@@ -162,7 +157,7 @@ function App() {
           style={{width:'100%', padding:'1rem', marginBottom:'1.5rem', border:'1px solid #cbd5e1', borderRadius:'1rem', fontSize:'1rem', boxSizing:'border-box'}}
         />
 
-        {/* DASHBOARD TAB — GORGEOUS PHONE CARDS */}
+        {/* DASHBOARD TAB — GORGEOUS CARDS */}
         {activeTab === 'dashboard' && (
           <div style={{display:'grid', gap:'1.2rem'}}>
             {filteredShipments.map((shipment, i) => {
@@ -178,7 +173,7 @@ function App() {
                   </div>
                   <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.6rem', fontSize:'1rem', color:'#475569'}}>
                     <div><strong>Container:</strong> {shipment.CONTAINER || '-'}</div>
-                    <div><strong>REF:</strong> {shipment.REF || shipment.CONTAINER || '-'}</div>
+                    <div><strong>REF:</strong> {shipment.REF || shipment.CONT/fwlink || '-'}</div>
                     <div><strong>INV:</strong> {shipment.INV || '-'}</div>
                     <div><strong>Customer:</strong> {shipment.CONSIGNEE || '-'}</div>
                     <div><strong>Commodity:</strong> {shipment.PRODUCTS || '-'}</div>
