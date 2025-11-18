@@ -36,22 +36,12 @@ function App() {
             );
           }
 
-          // SORTING BY STATUS CATEGORY
+          // SORT: PORT → STACK → PLANNED → EN ROUTE → OFFLOADED
           filtered.sort((a, b) => {
-            const statusA = (a.STATUS || '').toUpperCase();
-            const statusB = (b.STATUS || '').toUpperCase();
-
-            const priority = {
-              'PORT': 1,
-              'STACK': 2,
-              'PLANNED': 3,
-              'EN ROUTE': 4
-            };
-
-            const priA = priority[statusA] || 5; // OFFLOADED = 5
-            const priB = priority[statusB] || 5;
-
-            return priA - priB;
+            const statusOrder = { 'PORT': 1, 'STACK': 2, 'PLANNED': 3, 'EN ROUTE': 4 };
+            const aStatus = statusOrder[a.STATUS?.toUpperCase()] || 5;
+            const bStatus = statusOrder[b.STATUS?.toUpperCase()] || 5;
+            return aStatus - bStatus;
           });
 
           setShipments(filtered);
@@ -191,7 +181,6 @@ function App() {
                     <div><strong>ETA:</strong> {shipment['LIVE ETA'] || shipment.ETD || '-'}</div>
                   </div>
                 </div>
-:);
               );
             })}
           </div>
