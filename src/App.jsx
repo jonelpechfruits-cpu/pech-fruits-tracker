@@ -36,12 +36,12 @@ function App() {
             );
           }
 
-          // SORT: PORT → STACK → PLANNED → EN ROUTE → OFFLOADED
+          // SORT BY STATUS
           filtered.sort((a, b) => {
-            const statusOrder = { 'PORT': 1, 'STACK': 2, 'PLANNED': 3, 'EN ROUTE': 4 };
-            const aStatus = statusOrder[a.STATUS?.toUpperCase()] || 5;
-            const bStatus = statusOrder[b.STATUS?.toUpperCase()] || 5;
-            return aStatus - bStatus;
+            const order = { 'PORT': 1, 'EN ROUTE': 2, 'FEEDBACK': 3, 'PLANNED': 4, 'OFFLOAD': 5 };
+            const aStatus = (a.STATUS || '').toUpperCase();
+            const bStatus = (b.STATUS || '').toUpperCase();
+            return (order[aStatus] || 6) - (order[bStatus] || 6);
           });
 
           setShipments(filtered);
@@ -86,6 +86,17 @@ function App() {
       setDocs([{ name: 'No documents found', url: null }]);
     }
     setDocsLoading(false);
+  };
+
+  // Get status color
+  const getStatusColor = (status) => {
+    const s = (status || '').toUpperCase();
+    if (s.includes('PORT')) return {bg: '#fee2e2', text: '#991b1b'};     // Red
+    if (s.includes('EN ROUTE')) return {bg: '#fef9c3', text: '#854d0e'}; // Light Yellow
+    if (s.includes('FEEDBACK')) return {bg: '#fed7aa', text: '#9c4221'}; // Light Orange
+    if (s.includes('PLANNED')) return {bg: '#e5e7eb', text: '#4b5563'};  // Light Grey
+    if (s.includes('OFFLOAD')) return {bg: '#f0fdf4', text: '#166534'};  // Green
+    return {bg: '#f3f4f6', text: '#6b7280'}; // Default
   };
 
   if (!user) return (
@@ -162,13 +173,14 @@ function App() {
         {activeTab === 'dashboard' && (
           <div style={{display:'grid', gap:'1.2rem'}}>
             {filteredShipments.map((shipment, i) => {
-              const statusColor = shipment.STATUS?.includes('Delayed') ? '#dc2626' : '#16a34a';
+              const status = (shipment.STATUS || '').toUpperCase();
+              const color = getStatusColor(status);
 
               return (
                 <div key={i} onClick={() => openDocuments(shipment)} style={{background:'white', borderRadius:'1.2rem', boxShadow:'0 8px 25px rgba(0,0,0,0.1)', padding:'1.5rem', cursor:'pointer'}}>
                   <div style={{display:'flex', justifyContent:'space-between', alignItems:'start', marginBottom:'0.8rem'}}>
                     <h3 style={{fontSize:'1.4rem', fontWeight:'bold', color:'#1e293b'}}>{shipment.VESSEL || 'No Vessel'}</h3>
-                    <span style={{background:statusColor, color:'white', padding:'0.4rem 0.8rem', borderRadius:'0.5rem', fontSize:'0.8rem', fontWeight:'bold'}}>
+                    <span style={{background:color.bg, color:color.text, padding:'0.4rem 0.8rem', borderRadius:'0.5rem', fontSize:'0.8rem', fontWeight:'bold'}}>
                       {shipment.STATUS || 'Unknown'}
                     </span>
                   </div>
